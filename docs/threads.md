@@ -39,5 +39,7 @@ Lessons:
   changes".
 - The lock also requires approval from someone other than the last pusher,
   so every new push needs a fresh approval.
+- Check the number next to a pull request's title before approving. Two
+  approvals once landed on an old, already-merged one; the card now checks it.
 Open: build the guards (plan section 5, step 1 next); open questions 2–6;
 old branches on GitHub can be deleted.

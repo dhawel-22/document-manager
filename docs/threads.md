@@ -29,6 +29,7 @@ Done:
   as GitHub's.
 - Guards plan v1.0 added (pull request #4, entry a735f86). Nothing is
   installed yet.
+- Guards plan question 1 answered: administrator (plan v1.1).
 Lessons:
 - Talking needs no permission; only actions need "go".
 - New line-ending rules don't change files already on the computer. They
@@ -37,6 +38,5 @@ Lessons:
   changes".
 - The lock also requires approval from someone other than the last pusher,
   so every new push needs a fresh approval.
-Open: build the guards (plan section 5, step 1 next); guards plan question 1
-(administrator account); open questions 2–6; two old branches on GitHub
-can be deleted (record-catch-up, add-gitattributes).
+Open: build the guards (plan section 5, step 1 next); open questions 2–6;
+old branches on GitHub can be deleted.

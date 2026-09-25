@@ -1,7 +1,8 @@
 # Document Manager: Opening Document
 
-**Version:** 1.0 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
+**Version:** 1.1 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
 **Drafted by:** Claude, from thread "00 · Planning talk"
+**Changes:** v1.1 (2026-09-25): D-009 answered: public. Made through a pull request.
 
 Status labels (per D-015):
 - **Ernie:** decided by Ernie
@@ -43,7 +44,7 @@ build a tool worth having.
 | D-006 | Each tool gets its own thread | Replaced by D-013 |
 | D-007 | Teaching aids in every section. Every lesson example actually runs | Ernie; "actually runs" On trust |
 | D-008 | Decision records for every section: one register, replaced but never edited | Ernie; register rules On trust |
-| D-009 | Practice repository on GitHub Free, public; GitHub Pro when private work starts; no real data in any repository | Waiting (public?); rest On trust |
+| D-009 | Practice repository on GitHub Free, public; GitHub Pro when private work starts; no real data in any repository | Ernie: public; rest On trust |
 | D-010 | Practice project is a document register | Replaced by D-011 |
 | D-011 | The project is a document manager with a Python GUI; long term, all network files and Google Drive. Engine first, thin GUI | Ernie; engine-first and thin GUI On trust |
 | D-012 | SQL added to the required tools | Ernie; tool choices On trust |
@@ -86,9 +87,9 @@ linked by rule IDs.
 - Cost: GitHub Pro (about $4 a month) once private work starts; everything else free
 
 ## 9. Open questions (Waiting)
-1. Is it okay if anyone on the internet can see the practice project (code and
-   fake documents only)? Yes: free, with the full lock. No: $4 a month, or no
-   lock until the fire drills. (D-009)
+1. Answered 2026-09-24: yes, public. Is it okay if anyone on the internet can
+   see the practice project (code and fake documents only)? Yes: free, with the
+   full lock. No: $4 a month, or no lock until the fire drills. (D-009)
 2. Who are the lessons for?
 3. Do you have Microsoft 365 / SharePoint?
 4. Google Drive: mostly uploaded files, or native Docs and Sheets?

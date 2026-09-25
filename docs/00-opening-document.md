@@ -1,8 +1,9 @@
 # Document Manager: Opening Document
 
-**Version:** 1.1 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
+**Version:** 1.2 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
 **Drafted by:** Claude, from thread "00 · Planning talk"
 **Changes:** v1.1 (2026-09-25): D-009 answered: public. Made through a pull request.
+v1.2 (2026-09-25): D-016 and D-017 added, from the guards plan. Made through a pull request.
 
 Status labels (per D-015):
 - **Ernie:** decided by Ernie
@@ -51,6 +52,8 @@ build a tool worth having.
 | D-013 | One project, the Document Manager. The vault is Phase 0. Small sidebar; threads added only when needed | Ernie |
 | D-014 | Code lives at D:\python\projects\document-manager, not in Google Drive | Ernie |
 | D-015 | Ernie decides goals, priorities, money, risk and what "correct" means. Technical choices are recorded "On trust" and proven by evidence. Plain-language questions. Optional second opinion from the OpenAI side | Ernie |
+| D-016 | Claude asks before every file change and every command that changes something; look-only commands run without a click | Ernie |
+| D-017 | The Claude Code guards live in a settings file that Windows protects; changing it needs Ernie's administrator approval | Ernie |
 
 ## 5. Phases (On trust)
 Each phase must pass a clean scorecard before the next one starts.

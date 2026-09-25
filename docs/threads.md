@@ -17,3 +17,26 @@ Lessons:
   the private window, never click them from chat.
 - Read settings back to check them: the first check found approvals = 0, not 1.
 Open: Claude Code guards plan; line-ending fix; open questions 2–6.
+
+## 01 · Standing instructions and guards (2026-09-25)
+Purpose: standing instructions, the line-ending fix, and the guards plan.
+Decided: D-016 and D-017 (see 01-guards-plan.md).
+Done:
+- CLAUDE.md added, so every thread gets the standing instructions
+  (pull request #2, entry fa090c0).
+- Line-ending rules added (.gitattributes, pull request #3, entry 0d368fa).
+  This computer's copies were rewritten; every file now has the same bytes
+  as GitHub's.
+- Guards plan v1.0 added (pull request #4, entry a735f86). Nothing is
+  installed yet.
+Lessons:
+- Talking needs no permission; only actions need "go".
+- New line-ending rules don't change files already on the computer. They
+  must be rewritten once, and Git skips files it thinks are unchanged.
+- GitHub's newer "Files changed" page says "Submit review", not "Review
+  changes".
+- The lock also requires approval from someone other than the last pusher,
+  so every new push needs a fresh approval.
+Open: build the guards (plan section 5, step 1 next); guards plan question 1
+(administrator account); open questions 2–6; two old branches on GitHub
+can be deleted (record-catch-up, add-gitattributes).

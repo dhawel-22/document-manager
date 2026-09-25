@@ -1,0 +1,9 @@
+# Line endings: use one style everywhere, so a file's bytes (and its
+# fingerprint) are the same on this computer and on GitHub.
+# Text files get LF (Unix-style) line breaks. Git leaves files it
+# detects as binary, such as pictures, untouched.
+* text=auto eol=lf
+
+# Documents must never be changed by Git, not even their line breaks.
+# When a folder for documents is created, add a line for it here:
+#   <folder>/** -text

@@ -20,7 +20,8 @@ Open: Claude Code guards plan; line-ending fix; open questions 2–6.
 
 ## 01 · Standing instructions and guards (2026-09-25)
 Purpose: standing instructions, the line-ending fix, and the guards plan.
-Decided: D-016 and D-017 (see 01-guards-plan.md).
+Decided: D-016 and D-017 (see 01-guards-plan.md); D-018 (how AI work is
+credited).
 Done:
 - CLAUDE.md added, so every thread gets the standing instructions
   (pull request #2, entry fa090c0).
@@ -31,6 +32,9 @@ Done:
   installed yet.
 - Guards plan question 1 answered: administrator (plan v1.1).
 - Teaching aid added: docs/teaching/how-a-change-happens.md.
+- Entries and pull requests now end with a plain model note instead of
+  co-author lines (D-018). Earlier entries still list an outside "claude"
+  account as a contributor.
 Lessons:
 - Talking needs no permission; only actions need "go".
 - New line-ending rules don't change files already on the computer. They
@@ -41,5 +45,6 @@ Lessons:
   so every new push needs a fresh approval.
 - Check the number next to a pull request's title before approving. Two
   approvals once landed on an old, already-merged one; the card now checks it.
+- The note at the end of an entry is part of its text too; show it first.
 Open: build the guards (plan section 5, step 1 next); open questions 2–6;
 old branches on GitHub can be deleted.

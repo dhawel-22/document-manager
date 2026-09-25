@@ -30,6 +30,7 @@ Done:
 - Guards plan v1.0 added (pull request #4, entry a735f86). Nothing is
   installed yet.
 - Guards plan question 1 answered: administrator (plan v1.1).
+- Teaching aid added: docs/teaching/how-a-change-happens.md.
 Lessons:
 - Talking needs no permission; only actions need "go".
 - New line-ending rules don't change files already on the computer. They

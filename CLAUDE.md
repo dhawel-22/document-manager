@@ -35,6 +35,9 @@ this folder.
   `git -c user.name="dhawel-22-claude" -c user.email="333494763+dhawel-22-claude@users.noreply.github.com" commit ...`
 - Push as the AI account:
   `git -c credential.helper= -c "credential.helper=!gh auth git-credential" push ...`
+- End every commit message and pull request description with a plain note
+  naming the AI model, like "Made with Claude Opus 5.5." No "Co-Authored-By"
+  or "Generated with Claude Code" lines (D-018).
 
 ## Threads
 - Each thread has a numbered title, like "01 · Standing instructions and

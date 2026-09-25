@@ -26,6 +26,7 @@ this folder.
 - main on GitHub (dhawel-22/document-manager) is locked. Every change goes
   through a pull request that Ernie approves and merges on the website.
   One pull request per change.
+- Each change follows the four steps in docs/teaching/how-a-change-happens.md.
 - Claude works only as the GitHub account dhawel-22-claude. Never use
   Ernie's account (dhawel-22).
 - Before pushing, check that `gh auth status` shows dhawel-22-claude as the

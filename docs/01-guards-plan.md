@@ -1,8 +1,10 @@
 # Document Manager: Claude Code guards plan
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
+**Changes:** v1.1 (2026-09-25): question 1 answered: administrator. Made
+through a pull request.
 
 Status labels follow the opening document (D-015). Every guard stays
 "On trust" until its fire drill passes.
@@ -88,6 +90,7 @@ One step at a time, each after a "go":
   the worst cases.
 
 ## 7. Open question (Waiting)
-1. When you install a program, does Windows ask only "Yes or No", or does it
+1. Answered 2026-09-25: administrator (Windows asks only "Yes or No").
+   When you install a program, does Windows ask only "Yes or No", or does it
    ask for a password? The answer tells us whether your account is an
    administrator.

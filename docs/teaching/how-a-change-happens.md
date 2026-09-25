@@ -1,8 +1,10 @@
 # How a change happens
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
+**Changes:** v1.1 (2026-09-25): step 3 now checks the pull request number.
+Made through a pull request.
 
 A teaching aid (D-007). Every change follows the same four steps.
 
@@ -19,6 +21,7 @@ for changes.
 
 ## 3. Ernie's turn on GitHub (no "go")
 - Type the address yourself.
+- Check that the number next to the title matches the one Claude gave.
 - Read "Files changed".
 - Click "Submit review", choose "Approve", then submit.
 - Click "Merge pull request", then "Confirm merge".

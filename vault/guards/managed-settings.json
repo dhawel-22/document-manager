@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Edit(//c/Program Files/ClaudeCode/**)"
+    ],
+    "ask": [
+      "Edit(//d/python/projects/document-manager/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(Bash|PowerShell|Monitor|Edit|Write|NotebookEdit|mcp__ccd_session_mgmt__set_session_permission_mode|mcp__ccd_pr__set_auto_merge)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "args": [
+              "-NoProfile",
+              "-NonInteractive",
+              "-ExecutionPolicy",
+              "Bypass",
+              "-File",
+              "C:\\Program Files\\ClaudeCode\\hooks\\check-command.ps1"
+            ],
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

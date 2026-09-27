@@ -1,8 +1,10 @@
 # The guards: a plain-words guide
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "02 · Guards build"
+**Changes:** v1.1 (2026-09-26): the check script's test cases added. Made
+through a pull request.
 
 This guide says what each guard does. The other files in this folder must
 match it. The plan is `docs/01-guards-plan.md`. Every guard stays "On trust"
@@ -53,6 +55,10 @@ Kept here and changed only through pull requests:
 - `check-command.ps1`: the check script. It runs before every command and
   file change, and knows which folder a thread works in. If it hits an
   error, it stops the action instead of letting it through. Drill 19.
+- `check-command-tests.csv`: the check script's test cases. Each line says
+  what Claude tries and whether the script must block it, ask first, or
+  leave it to the app's usual rules ("normal"). The script must pass every
+  case before it is installed.
 - `tamper-check.ps1`: compares the installed guards with these copies and
   says "same" or "different". It also checks that this project's Git name
   is the AI account (guard 4). Look-only. Drill 13.

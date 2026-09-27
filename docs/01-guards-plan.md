@@ -1,12 +1,14 @@
 # Document Manager: Claude Code guards plan
 
-**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
 **Changes:** v1.1 (2026-09-25): question 1 answered: administrator. Made
 through a pull request.
 v1.2 (2026-09-25): section 8 (findings from build step 1) and question 2
 added, in thread "02 · Guards build". Made through a pull request.
+v1.3 (2026-09-26): question 2 answered: python asks first only in this
+project. Made through a pull request.
 
 Status labels follow the opening document (D-015). Every guard stays
 "On trust" until its fire drill passes.
@@ -96,9 +98,14 @@ One step at a time, each after a "go":
    When you install a program, does Windows ask only "Yes or No", or does it
    ask for a password? The answer tells us whether your account is an
    administrator.
-2. Your personal settings file lets Claude run any `python` command in Bash
+2. Answered 2026-09-26: only in this project (choice 2). Other projects
+   keep the shortcut. The check covers every way to start Python here,
+   including the project's own venv (its own copy of Python in this folder).
+   Your personal settings file lets Claude run any `python` command in Bash
    without asking, in every project. How should this project close that gap?
-   The choices come in build step 2 (section 8).
+   Choice 1: python asks first in every project. Choice 2: python asks
+   first only in this project, through a check that acts only inside this
+   folder.
 
 ## 8. Findings from build step 1 (2026-09-25)
 Sources: Anthropic's Claude Code help pages at code.claude.com/docs/en/

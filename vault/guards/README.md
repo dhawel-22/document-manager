@@ -1,12 +1,13 @@
 # The guards: a plain-words guide
 
-**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "02 · Guards build"
 **Changes:** v1.1 (2026-09-26): the check script's test cases added. Made
 through a pull request.
 v1.2 (2026-09-26): the check script and its test runner added. Made through
 a pull request.
+v1.3 (2026-09-26): the tamper check added. Made through a pull request.
 
 This guide says what each guard does. The other files in this folder must
 match it. The plan is `docs/01-guards-plan.md`. Every guard stays "On trust"
@@ -64,8 +65,10 @@ Kept here and changed only through pull requests:
 - `run-check-tests.ps1`: runs every test case against the check script and
   shows pass or fail. Look-only.
 - `tamper-check.ps1`: compares the installed guards with these copies and
-  says "same" or "different". It also checks that this project's Git name
-  is the AI account (guard 4). Look-only. Drill 13.
+  says "same" or "different". It also reports any extra file in the guards
+  folder, any Windows registry policy for Claude Code (one would outrank the
+  protected file), and whether this project's Git name and email are the AI
+  account's (guard 4). Look-only. Drill 13.
 
 Installed in build step 3, with Ernie's administrator "Yes":
 - `C:\Program Files\ClaudeCode\managed-settings.json`

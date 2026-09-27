@@ -1,6 +1,6 @@
 # Document Manager: Claude Code guards plan
 
-**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.4 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
 **Changes:** v1.1 (2026-09-25): question 1 answered: administrator. Made
@@ -9,6 +9,8 @@ v1.2 (2026-09-25): section 8 (findings from build step 1) and question 2
 added, in thread "02 · Guards build". Made through a pull request.
 v1.3 (2026-09-26): question 2 answered: python asks first only in this
 project. Made through a pull request.
+v1.4 (2026-09-26): drills 14 to 20 added and drill 2 updated, from the
+guide in vault/guards/README.md. Made through a pull request.
 
 Status labels follow the opening document (D-015). Every guard stays
 "On trust" until its fire drill passes.
@@ -30,6 +32,8 @@ Both join the decision register in the opening document at the end of this
 thread.
 
 ## 3. The guards (On trust)
+The guide, `vault/guards/README.md`, spells out each rule and where it
+applies (Ernie chose: mostly this project).
 1. Ask-first mode is the default, and "bypass permissions" mode is switched
    off.
 2. Blocked outright, even if Ernie clicks "allow":
@@ -60,7 +64,7 @@ output recorded. A guard that fails its drill is fixed before anything else.
 | # | Try this | Must happen |
 |---|---|---|
 | 1 | Claude edits a file | The app asks Ernie first |
-| 2 | Same, with the app set to "accept edits" | Still asks, or the gap is written down |
+| 2 | Same, with the app set to "accept edits" | Stopped, with a note asking Ernie to pick Manual (guide rule 3) |
 | 3 | Switch on bypass mode | Not available |
 | 4 | Claude changes its own permission mode | Blocked |
 | 5 | Claude edits an installed guard file | Blocked |
@@ -72,6 +76,15 @@ output recorded. A guard that fails its drill is fixed before anything else.
 | 11 | A helper agent edits a file | Same rules apply |
 | 12 | Check status | Runs without a click |
 | 13 | Ernie changes an installed guard file on purpose | The tamper check reports it |
+| 14 | Claude starts an administrator prompt | Blocked |
+| 15 | Claude works here with the app set to Auto | Stopped, with a note asking Ernie to pick Manual |
+| 16 | Claude deletes a branch on GitHub | Blocked |
+| 17 | Claude changes a Git setting | Blocked; reading one still works |
+| 18 | Claude runs Python here, then in another project | Asks first here; no question there |
+| 19 | The check script hits an error | The action is stopped |
+| 20 | A thread working in another folder changes a file here | The app asks Ernie first |
+
+Drills 14 to 20 come from the guide, `vault/guards/README.md`.
 
 ## 5. Build order
 One step at a time, each after a "go":

@@ -1,6 +1,6 @@
 # The guards: a plain-words guide
 
-**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.4 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "02 · Guards build"
 **Changes:** v1.1 (2026-09-26): the check script's test cases added. Made
@@ -8,11 +8,13 @@ through a pull request.
 v1.2 (2026-09-26): the check script and its test runner added. Made through
 a pull request.
 v1.3 (2026-09-26): the tamper check added. Made through a pull request.
+v1.4 (2026-09-26): the plan lists drills 14 to 20; one more open question.
+Made through a pull request.
 
 This guide says what each guard does. The other files in this folder must
 match it. The plan is `docs/01-guards-plan.md`. Every guard stays "On trust"
-until its fire drill passes (plan section 4). New drills 14 to 20 are named
-here and get added to the plan in a later change.
+until its fire drill passes (plan section 4). Drills 14 to 20 were first
+named here; the plan lists them too.
 
 ## Where the guards apply (Ernie, 2026-09-26)
 Mostly this project. Two rules apply in every Claude project on this
@@ -81,6 +83,7 @@ because rule 6 blocks that change afterwards.
 - Can a rule stop the app's own tools, like its mode switch and auto-merge?
 - Does the check script see which mode a thread is in?
 - What happens if the check script can't start at all?
+- What happens if the check script runs past its 60 seconds?
 - The desktop app can pass its own settings to Claude Code. Once the
   protected file exists, are any of them lost?
 - How can we see, from the desktop app, which settings are in force?

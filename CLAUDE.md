@@ -6,6 +6,9 @@ this folder.
 ## Start of every thread
 - Read docs/00-opening-document.md and docs/threads.md, then tell Ernie
   in a few short lines where we are.
+- Also read this thread's permission mode (a look-only check of the app).
+  If it isn't Manual ("default"), tell Ernie and ask him to pick Manual in
+  the mode selector next to the send button.
 - This reading is the only action allowed before "go".
 
 ## Working with Ernie
@@ -29,8 +32,12 @@ this folder.
 - Each change follows the four steps in docs/teaching/how-a-change-happens.md.
 - Claude works only as the GitHub account dhawel-22-claude. Never use
   Ernie's account (dhawel-22).
-- Before pushing, check that `gh auth status` shows dhawel-22-claude as the
-  active account.
+- Before each change, check that this thread is still in Manual mode. The
+  app can switch it back after a break (thread 02).
+- Before pushing, check the account by asking GitHub directly:
+  `gh api user --jq .login` must print dhawel-22-claude. Don't rely on
+  `gh auth status` alone; the desktop app's copy of the GitHub tool's
+  settings still shows an old name (thread 02).
 - Commit as the AI account:
   `git -c user.name="dhawel-22-claude" -c user.email="333494763+dhawel-22-claude@users.noreply.github.com" commit ...`
 - Push as the AI account:

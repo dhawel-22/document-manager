@@ -49,29 +49,39 @@ Lessons:
 Open: build the guards (plan section 5, step 1 next); open questions 2–6;
 old branches on GitHub can be deleted.
 
-## 02 · Guards build (from 2026-09-25)
+## 02 · Guards build (2026-09-25 to 2026-09-27)
 Purpose: build the Claude Code guards (guards plan, section 5).
-Decided: nothing new yet.
+Decided: question 2, Python asks first only in this project (plan v1.3);
+D-019, the project's own venv; the guards cover mostly this project (guide,
+vault/guards/README.md).
 Done:
-- This thread switched from "Accept edits" to Manual, so the app asks
-  before file changes.
-- Build step 1: the guards plan v1.2 records what Claude Code 2.1.281
-  supports on Windows, and adds question 2 (pull request #10, entry
-  94d12ba). Nothing is installed yet.
+- Build step 1: what Claude Code 2.1.281 supports on Windows (#10).
+- The thread log entry (#11), question 2 (#12) and D-019 (#13).
+- Standing instructions: check the mode, and ask GitHub for the account
+  (#14). Guard 4: this project's Git name is the AI account's.
+- Build step 2: the guide, the protected settings file, the test cases, the
+  check script and the tamper check (#15 to #19); the drill list (#20);
+  install and undo scripts (#21).
+- Build step 3: Ernie installed the guards on 2026-09-27; tamper check ALL
+  SAME.
+- Build step 5, first pass: 17 of 20 drills passed (#22, #23; plan
+  section 9). Every file change here now asks first (#23). Six saved
+  "don't ask again" approvals were removed.
 Lessons:
-- The desktop app remembers the mode picked for a folder, and that beats
-  the default. This thread came back in "Accept edits" after a break.
-  Check the mode at the start of each thread and after each break.
-- The desktop app keeps its own copy of the GitHub tool's settings, and it
-  still names Ernie's account. So `gh auth status` can show "dhawel-22"
-  while GitHub actually sees the AI account. No sign-in for Ernie's account
-  was found on this computer. The reliable check asks GitHub: `gh api user`.
-- Too much at once loses Ernie. One short step at a time, in plain words,
-  and say what each click is for before asking for it.
-- Ernie's review is the real check, so each change must be small and plain
-  enough to read. "I don't understand this" is always a fine answer.
-Open: question 2 (the python rule), then build step 2; a proposal for
-checking code Ernie can't judge (tests first, code can't change its own
-tests, a scope check, a second reviewer, approving results); CLAUDE.md: add
-the mode check and use `gh api user`; tidy the leftover name in the app's
-copy; old branches on GitHub can be deleted; open questions 2–6.
+- The mode switched to "Accept edits" twice without anyone changing it,
+  right after pull requests #10 and #21 were merged, not after a break as
+  this entry first said. Cause not found; rule 3 now stops all work here
+  when it happens.
+- "Always allow" makes the app skip questions, even the guards' own.
+  Answer plain Yes or No.
+- The desktop app doesn't ask before file changes on its own, even in
+  Manual mode. The drills found this; the tests on paper couldn't.
+- The desktop app keeps its own copy of the GitHub tool's settings, with an
+  old name in it. The reliable account check is `gh api user`.
+- Too many steps and long messages lose Ernie. Real work needs a lighter
+  routine.
+Open: drills 13 and 20, and the other-project half of 18; build step 4
+(the GitHub website steps); a lighter routine (one "go" per change); the
+proposal for checking code Ernie can't judge; why the mode switches; old
+branches on GitHub; the leftover name in the app's copy; open questions
+2–6.

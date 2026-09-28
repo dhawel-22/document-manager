@@ -12,7 +12,7 @@ T10,here,default,mcp__ccd_session_mgmt__set_session_permission_mode,"{""session_
 T11,elsewhere,acceptEdits,Edit,D:\python\projects\vsa_edge\notes.md,normal,Other projects keep working as before
 T12,here,default,Bash,git status,normal,Rule 4: look-only; the app's usual rules decide
 T13,here,default,PowerShell,Get-ChildItem docs,normal,Rule 4: look-only
-T14,here,default,Edit,D:\python\projects\document-manager\docs\threads.md,normal,Rule 4: Manual mode already asks before every file change
+T14,here,default,Edit,D:\python\projects\document-manager\docs\threads.md,ask,"Rule 4: every file change here asks first (the app's own question doesn't appear, drill 1)"
 T15,elsewhere,default,PowerShell,Set-Content D:\python\projects\document-manager\notes.txt -Value hi,ask,Rule 5: a thread elsewhere changing this folder's files asks first
 T16,elsewhere,acceptEdits,Write,D:\python\projects\document-manager\notes.txt,ask,Rule 5: the same with Claude's file tools
 T17,elsewhere,default,Bash,cat /d/python/projects/document-manager/CLAUDE.md,ask,"Rule 5: the check can't always tell reading from changing, so it asks"
@@ -48,3 +48,4 @@ T46,here,default,Bash,pytest,ask,Rule 7: pytest runs Python too
 T47,elsewhere,default,Bash,python script.py,normal,Rule 7: other projects keep the shortcut
 T48,here,default,(broken),this is not JSON,block,"Drill 19: if the check can't read what Claude is trying, it stops it"
 T49,here (helper agent),acceptEdits,Write,D:\python\projects\document-manager\notes.txt,block,Rule 4: helper agents follow the same rules
+T50,here,default,Write,C:\Users\Drew\AppData\Local\Temp\notes.txt,normal,Rule 4: files outside this folder keep the app's usual rules

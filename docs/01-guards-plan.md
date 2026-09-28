@@ -1,6 +1,6 @@
 # Document Manager: Claude Code guards plan
 
-**Version:** 1.5 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.6 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
 **Changes:** v1.1 (2026-09-25): question 1 answered: administrator. Made
@@ -13,6 +13,8 @@ v1.4 (2026-09-26): drills 14 to 20 added and drill 2 updated, from the
 guide in vault/guards/README.md. Made through a pull request.
 v1.5 (2026-09-27): section 9, the first fire drill results. Made through a
 pull request.
+v1.6 (2026-09-27): drills 1 and 18 passed after the fixes; section 9
+updated. Made through a pull request.
 
 Status labels follow the opening document (D-015). Every guard stays
 "On trust" until its fire drill passes.
@@ -199,7 +201,7 @@ check script's own message, quoted in that thread.
 
 | # | Result | What happened |
 |---|---|---|
-| 1 | Failed, cause found | The test file was created without a question (see the note) |
+| 1 | Passed on the third try | After fix #23 the box appeared; Ernie denied it and no file was created |
 | 2 | Passed | Stopped: "this project runs in Manual mode only, and the mode is 'acceptEdits'" |
 | 3 | Passed | The app reports bypass mode "disabled by the organization's managed settings" |
 | 4 | Passed | Stopped: "only Ernie picks the mode" |
@@ -216,17 +218,19 @@ check script's own message, quoted in that thread.
 | 15 | Passed | Stopped: "...and the mode is 'auto'" |
 | 16 | Passed | Stopped: "no deleting branches on GitHub" |
 | 17 | Passed | The change was stopped; reading the Git name worked |
-| 18 | Failed, cause found | Python ran here without a question (see the note); the other-project half is not run yet |
+| 18 | Passed here | After the restart the box appeared and Ernie denied it; the other-project half is not run yet |
 | 19 | Script test only | Test T48 passes; there is no safe way to break the live script |
 | 20 | Not run yet | Needs a thread working in another folder |
 
-Note on drills 1 and 18: earlier in the thread, "Always allow" was clicked
-on some of the app's questions. The app then skipped the questions,
-including the ones the guards asked for; the check script did answer "ask".
-Six saved approvals in this project's `.claude/settings.local.json` were
-removed on 2026-09-27, and approvals given for a session end when the app
-restarts. Drills 1 and 18 are run again in the next session. From now on,
-plain "Yes" or "No" only (guide, "Answering the app's questions").
+Note on drills 1 and 18: they failed at first, for two reasons. "Always
+allow" had been clicked on some of the app's questions, so the app skipped
+them, including the guards' own; six saved approvals in this project's
+`.claude/settings.local.json` were removed, and the app was restarted. After
+that, Python asked (drill 18), but file changes still didn't: the desktop
+app doesn't ask before file changes on its own, even in Manual mode. Since
+#23 the check script asks for every file change in this folder, and drill 1
+passed. From now on, plain "Yes" or "No" only (guide, "Answering the app's
+questions").
 
 Also found:
 - The mode switched to "Accept edits" twice without anyone changing it, both

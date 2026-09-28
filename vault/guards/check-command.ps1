@@ -321,6 +321,8 @@ try {
     }
     if ($mode -eq 'plan' -and ($command -or $filePath)) { Ask 'in Plan mode every command asks first (rule 3)' }
     if ($command -and (Test-Python $plain 0)) { Ask 'Python asks first in this project (rule 7)' }
+    # The desktop app doesn't ask before file changes on its own (drill 1), so the check does
+    if ($filePath -and (Test-Inside $filePath $ProjectRoot)) { Ask 'every file change in this project asks first (rule 4)' }
     exit 0
 }
 catch {

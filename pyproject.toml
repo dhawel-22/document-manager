@@ -1,0 +1,13 @@
+# Lets Python find the program by name, so the commands in spec/report.md
+# work as written. requirements-dev.txt installs it into .venv.
+[build-system]
+requires = ["setuptools==84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "document-manager"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.setuptools.package-data]
+document_manager = ["*.sql"]

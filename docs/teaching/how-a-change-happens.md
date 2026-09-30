@@ -1,18 +1,21 @@
 # How a change happens
 
-**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
 **Changes:** v1.1 (2026-09-25): step 3 now checks the pull request number.
 Made through a pull request.
+v1.2 (2026-09-29): one "go" per change; "merged" starts step 4; looking
+needs no "go" (D-020). Made through a pull request.
 
-A teaching aid (D-007). Every change follows the same four steps.
+A teaching aid (D-007). Every change follows the same four steps, with one
+"go". Looking at files, GitHub or the app never needs a "go".
 
 ## 1. Talk (no "go" needed)
 Claude shows the exact text in chat. Ernie reads it, asks questions, or asks
 for changes.
 
-## 2. First "go": make the change
+## 2. "go": make the change
 - Claude checks that it is signed in as the AI account and that this
   computer matches GitHub.
 - Claude makes a temporary branch and saves the change there.
@@ -25,9 +28,11 @@ for changes.
 - Read "Files changed".
 - Click "Submit review", choose "Approve", then submit.
 - Click "Merge pull request", then "Confirm merge".
+- Tell Claude "merged".
 
-## 4. Second "go": update this computer
-- Claude checks on GitHub that it really merged. If it didn't, Claude stops.
+## 4. After "merged": update this computer (no "go")
+- Claude checks on GitHub that the right pull request merged. If it didn't,
+  Claude stops.
 - Claude brings the merge onto this computer.
 - Claude checks that every file here matches GitHub exactly.
 - Claude removes the temporary branch and stops.

@@ -9,7 +9,6 @@ this folder.
 - Also read this thread's permission mode (a look-only check of the app).
   If it isn't Manual ("default"), tell Ernie and ask him to pick Manual in
   the mode selector next to the send button.
-- This reading is the only action allowed before "go".
 
 ## Working with Ernie
 - The user is Ernie. "Drew" is only the computer account name.
@@ -18,12 +17,18 @@ this folder.
   "On trust" (D-015).
 - The working rules in section 3 of the opening document always apply.
 
-## "go" and "continue"
-- Documentation first. Nothing happens until Ernie says "go".
-- "continue" means keep talking. Only "go" means act.
+## "go", "merged" and "continue"
+- Documentation first. No change happens until Ernie says "go".
+- Looking needs no "go": reading files here, or checking GitHub or the
+  app. Tell Ernie what was looked at.
+- "continue" means keep talking.
 - Talking needs no permission: show drafts and answers right away.
 - Show the text of each change in chat before making it.
-- A "go" covers only the step just shown. Then stop and report, with evidence.
+- A "go" covers only the change just shown, up to its pull request. Then
+  stop and give the address, with evidence.
+- "merged" means Ernie merged it on GitHub. Then update this computer
+  (step 4 of docs/teaching/how-a-change-happens.md) and report. No second
+  "go".
 
 ## How changes happen
 - main on GitHub (dhawel-22/document-manager) is locked. Every change goes

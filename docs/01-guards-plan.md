@@ -1,6 +1,6 @@
 # Document Manager: Claude Code guards plan
 
-**Version:** 1.8 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.9 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
 **Changes:** v1.1 (2026-09-25): question 1 answered: administrator. Made
@@ -18,6 +18,8 @@ updated. Made through a pull request.
 v1.7 (2026-09-29): drills 13, 18 and 20 in section 9, and rule 5 now
 blocks. Made through a pull request.
 v1.8 (2026-09-30): build step 4 done; section 10, the scorecard. Made
+through a pull request.
+v1.9 (2026-09-30): merging needs the "bypass rules" tick (section 10). Made
 through a pull request.
 
 Status labels follow the opening document (D-015). Every guard stays
@@ -277,6 +279,9 @@ Build step 4 (guard 8), done by Ernie on GitHub on 2026-09-30:
   bypass list, for pull requests only. Read back as the AI account, for
   both rule sets: "can the AI account get past it: never". Not yet proven
   by a drill where the AI account tries to merge.
+  It stops even Ernie until he ticks "Merge without waiting for
+  requirements to be met (bypass rules)"; that lifts only this rule set,
+  since protect-main has no bypass list. First used on #34.
 - The AI account keeps "write". For a project owned by a personal
   account, GitHub offers helpers no lower level.
 

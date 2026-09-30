@@ -1,12 +1,14 @@
 # How a change happens
 
-**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
 **Changes:** v1.1 (2026-09-25): step 3 now checks the pull request number.
 Made through a pull request.
 v1.2 (2026-09-29): one "go" per change; "merged" starts step 4; looking
 needs no "go" (D-020). Made through a pull request.
+v1.3 (2026-09-30): step 3 adds the "bypass rules" tick, needed since the
+rule set only-ernie-merges. Made through a pull request.
 
 A teaching aid (D-007). Every change follows the same four steps, with one
 "go". Looking at files, GitHub or the app never needs a "go".
@@ -27,6 +29,9 @@ for changes.
 - Check that the number next to the title matches the one Claude gave.
 - Read "Files changed".
 - Click "Submit review", choose "Approve", then submit.
+- Tick "Merge without waiting for requirements to be met (bypass rules)".
+  Only Ernie has this box. It lifts only the rule set only-ernie-merges;
+  the approval is still required.
 - Click "Merge pull request", then "Confirm merge".
 - Tell Claude "merged".
 

@@ -129,8 +129,12 @@ Done:
   approved within seconds without being seen. Rule 5 now blocks (#33).
 - Build step 4 on GitHub: the rule set only-ernie-merges. As the AI
   account, GitHub reports it can never get past either rule set.
-- The scorecard, guards plan section 10. 50 guard test cases and 28 engine
-  tests pass.
+- The scorecard, guards plan section 10 (#34). 50 guard test cases and 28
+  engine tests pass.
+- A plan for reusing the vault in other projects: version 1.0, a draft
+  with four open questions (#35).
+- The drill thread "New session" (in D:\python\projects\New folder) was
+  archived.
 Lessons:
 - A question box protects only if it's read. What matters must be
   blocked, or go through a pull request.
@@ -144,11 +148,13 @@ Lessons:
 - The guard test runner errors on every case when started from
   PowerShell 7. Run it from Git Bash.
 - One step at a time, each confirmed before the next, works for Ernie.
-Open: a drill where the AI account tries to merge; rules 4 and 7 still
-only ask; the flashing check script window; tools from the opening
+- The rule set only-ernie-merges stops even Ernie until he ticks "bypass
+  rules"; only he has that box (how-a-change-happens v1.3).
+Open: the four questions of the reuse plan (docs/02-reuse-plan.md,
+section 7); a drill where the AI account tries to merge; rules 4 and 7
+still only ask; the flashing check script window; tools from the opening
 document not set up yet (GitHub Actions, pre-commit, Pydantic/pandera,
 check-out/check-in scripts); why the mode switched in thread 02; why the
 PowerShell command swapped the file names and contents (thread 03); old
-branches on GitHub; the leftover name in the app's copy; the drill thread
-"New session" (in D:\python\projects\New folder) can be archived; open
-questions 2–6.
+branches on GitHub; the leftover name in the app's copy; open questions
+2–6.

@@ -134,7 +134,8 @@ Done:
 - A plan for reusing the vault in other projects: version 1.0, a draft
   with four open questions (#35).
 - The drill thread "New session" (in D:\python\projects\New folder) was
-  archived.
+  archived, then brought back: no archiving until the project is
+  operational (CLAUDE.md).
 Lessons:
 - A question box protects only if it's read. What matters must be
   blocked, or go through a pull request.

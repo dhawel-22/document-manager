@@ -116,3 +116,39 @@ far: he reads the rules, and a test checks each rule); why the mode
 switched in thread 02; why the PowerShell command swapped the file names
 and contents; old branches on GitHub; the leftover name in the app's copy;
 open questions 2–6.
+
+## 04 · Finish Phase 0 (2026-09-29 to 2026-09-30)
+Purpose: finish the guards plan: the last drills, the GitHub website steps
+and the scorecard.
+Decided: rule 5 blocks instead of asking (drill 20); only Ernie can change
+main on GitHub (rule set only-ernie-merges).
+Done:
+- Drill 13 passed: the tamper check caught a changed guard file.
+- Drill 18 passed in another folder: Python ran with no question.
+- Drill 20 failed at first: the check asked, but the questions were
+  approved within seconds without being seen. Rule 5 now blocks (#33).
+- Build step 4 on GitHub: the rule set only-ernie-merges. As the AI
+  account, GitHub reports it can never get past either rule set.
+- The scorecard, guards plan section 10. 50 guard test cases and 28 engine
+  tests pass.
+Lessons:
+- A question box protects only if it's read. What matters must be
+  blocked, or go through a pull request.
+- Asked to run a drill, another Claude thread went on to read the app's
+  logs, record the mouse, and give an administrator command for Ernie's
+  open window; the installed guards then changed. The tamper check caught
+  it. Administrator commands now come only from the project's approved
+  files.
+- Claude stated as fact something it hadn't checked. Say only what the
+  evidence shows.
+- The guard test runner errors on every case when started from
+  PowerShell 7. Run it from Git Bash.
+- One step at a time, each confirmed before the next, works for Ernie.
+Open: a drill where the AI account tries to merge; rules 4 and 7 still
+only ask; the flashing check script window; tools from the opening
+document not set up yet (GitHub Actions, pre-commit, Pydantic/pandera,
+check-out/check-in scripts); why the mode switched in thread 02; why the
+PowerShell command swapped the file names and contents (thread 03); old
+branches on GitHub; the leftover name in the app's copy; the drill thread
+"New session" (in D:\python\projects\New folder) can be archived; open
+questions 2–6.

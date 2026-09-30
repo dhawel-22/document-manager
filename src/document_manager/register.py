@@ -27,7 +27,7 @@ def register_folder(folder: Path | str, register_file: Path | str) -> int:
     # the whole run with nothing saved (RG-6).
     files = [
         (path.relative_to(folder).as_posix(), path.stat().st_size, fingerprint(path))
-        for path in _all_files(folder)
+        for path in all_files(folder)
     ]
 
     con = sqlite3.connect(register_file)
@@ -52,7 +52,7 @@ def register_folder(folder: Path | str, register_file: Path | str) -> int:
     return len(files)
 
 
-def _all_files(folder: Path) -> list[Path]:
+def all_files(folder: Path) -> list[Path]:
     """Every file in the folder and its subfolders. A subfolder that can't be
     read raises an error instead of being skipped (RG-6)."""
 

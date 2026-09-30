@@ -85,3 +85,34 @@ Open: drills 13 and 20, and the other-project half of 18; build step 4
 proposal for checking code Ernie can't judge; why the mode switches; old
 branches on GitHub; the leftover name in the app's copy; open questions
 2–6.
+
+## 03 · Lighter routine (2026-09-29)
+Purpose: a lighter routine, then start building the engine.
+Decided: D-020, one "go" per change, "merged" starts the update of this
+computer, and looking needs no "go"; D-021, quality over speed.
+Done:
+- The lighter routine (#25): the card v1.2, CLAUDE.md, opening document
+  v1.5.
+- Python set up (#26): the project's own venv, pytest 9.1.1, a first test.
+- The engine, each piece with plain rules in spec/ and a test for each
+  rule: fingerprint (#27), register (#28), check (#29), and the report with
+  two commands, register and check (#30).
+- A demo on fake files found that the commands didn't work as written.
+  Fixed (#31); a new test now runs them the way Ernie would. 28 tests pass.
+Lessons:
+- Tests that call the code directly can miss what Ernie actually runs.
+  Test commands the way he types them.
+- A PowerShell command without named settings wrote three files into the
+  project folder instead of the scratch folder, with no error. The next
+  check caught it, and the files were moved out. Always name the settings,
+  and check where a command wrote, not just whether it did.
+- The mode stayed Manual after all seven merges today (#25 to #31).
+- Ernie got lost twice. Start each change with one plain line on what it
+  gets him, and keep a short "where we are" list.
+Open: Phase 0 still needs drills 13 and 20, the other-project half of 18,
+build step 4 (the GitHub website steps) and the scorecard before the
+window (Phase 1); the proposal for checking code Ernie can't judge (so
+far: he reads the rules, and a test checks each rule); why the mode
+switched in thread 02; why the PowerShell command swapped the file names
+and contents; old branches on GitHub; the leftover name in the app's copy;
+open questions 2–6.

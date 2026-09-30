@@ -1,12 +1,13 @@
 # Document Manager: Opening Document
 
-**Version:** 1.5 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
+**Version:** 1.6 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
 **Drafted by:** Claude, from thread "00 · Planning talk"
 **Changes:** v1.1 (2026-09-25): D-009 answered: public. Made through a pull request.
 v1.2 (2026-09-25): D-016 and D-017 added, from the guards plan. Made through a pull request.
 v1.3 (2026-09-25): D-018 added. Made through a pull request.
 v1.4 (2026-09-26): D-019 added. Made through a pull request.
 v1.5 (2026-09-29): D-020 added; rule 1 updated. Made through a pull request.
+v1.6 (2026-09-29): D-021 added. Made through a pull request.
 
 Status labels (per D-015):
 - **Ernie:** decided by Ernie
@@ -60,6 +61,7 @@ build a tool worth having.
 | D-018 | AI work is credited by the AI account plus a plain note naming the model, like "Made with Claude Opus 5.5"; no co-author lines that list outside accounts | Ernie |
 | D-019 | Python for this project runs from its own venv (`.venv`) in the project folder, not the computer-wide Python. The venv is never stored in Git, and it is set up with the tools in Phase 0, after the guards | Ernie; Git and timing On trust |
 | D-020 | One "go" per change; "merged" starts the update of this computer. Looking (reading files, checking GitHub or the app) needs no "go" | Ernie |
+| D-021 | Quality over speed: the highest thinking setting ("max") and the full text of every change in chat stay, even under budget pressure | Ernie |
 
 ## 5. Phases (On trust)
 Each phase must pass a clean scorecard before the next one starts.

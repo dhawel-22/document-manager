@@ -3,3 +3,6 @@
 .venv/
 __pycache__/
 .pytest_cache/
+# Made when the program is installed into .venv (pyproject.toml).
+*.egg-info/
+build/

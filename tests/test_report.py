@@ -1,6 +1,12 @@
-"""Tests for the report rules in spec/report.md (RP-1 to RP-4)."""
+"""Tests for the report rules in spec/report.md (RP-1 to RP-5)."""
+
+import subprocess
+import sys
+from pathlib import Path
 
 from document_manager.__main__ import main
+
+PROJECT = Path(__file__).resolve().parent.parent
 
 
 def make_docs(tmp_path):
@@ -57,3 +63,20 @@ def test_rp4_problem_in_one_plain_line(tmp_path, capsys):
     out = capsys.readouterr().out
     assert out.startswith("Problem: ") and "CK-7" in out
     assert out.count("\n") == 1
+
+
+def test_rp5_the_commands_work_as_written(tmp_path):
+    docs = make_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    command = [sys.executable, "-m", "document_manager"]
+    registered = subprocess.run(
+        [*command, "register", str(docs), str(reg)],
+        cwd=PROJECT, capture_output=True, text=True,
+    )
+    checked = subprocess.run(
+        [*command, "check", str(docs), str(reg)],
+        cwd=PROJECT, capture_output=True, text=True,
+    )
+    assert registered.returncode == 0, registered.stderr
+    assert checked.returncode == 0, checked.stderr
+    assert checked.stdout == "Nothing has changed. Files checked: 3.\n"

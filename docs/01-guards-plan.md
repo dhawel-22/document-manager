@@ -1,6 +1,6 @@
 # Document Manager: Claude Code guards plan
 
-**Version:** 1.7 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.8 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "01 · Standing instructions and guards"
 **Changes:** v1.1 (2026-09-25): question 1 answered: administrator. Made
@@ -17,6 +17,8 @@ v1.6 (2026-09-27): drills 1 and 18 passed after the fixes; section 9
 updated. Made through a pull request.
 v1.7 (2026-09-29): drills 13, 18 and 20 in section 9, and rule 5 now
 blocks. Made through a pull request.
+v1.8 (2026-09-30): build step 4 done; section 10, the scorecard. Made
+through a pull request.
 
 Status labels follow the opening document (D-015). Every guard stays
 "On trust" until its fire drill passes.
@@ -252,3 +254,39 @@ Also found on 2026-09-29:
   through a command another Claude thread gave for the administrator
   window. The tamper check caught it (2 DIFFERENT). From now on,
   administrator commands come only from the project's approved files.
+
+## 10. Scorecard (2026-09-30)
+Build step 6, in thread "04 · Finish Phase 0".
+
+| Build step | Result |
+|---|---|
+| 1. What Claude Code supports | Done (#10) |
+| 2. Guard files and tamper check | Done (#15 to #21) |
+| 3. Install | Done 2026-09-27; reinstalled 2026-09-30, tamper check ALL SAME |
+| 4. GitHub website steps | Done 2026-09-30, below |
+| 5. Fire drills | Done (#22, #23, #33), section 9 |
+| 6. Scorecard | This section |
+
+Fire drills: 19 of 20 passed a live drill. Drill 19 passed as a script
+test only (T48): there is no safe way to break the live check script. All
+50 test cases pass (2026-09-29, run from Git Bash).
+
+Build step 4 (guard 8), done by Ernie on GitHub on 2026-09-30:
+- Only Ernie can change main. A second rule set, only-ernie-merges, has
+  one rule, "Restrict updates", and only Repository admin (Ernie) on its
+  bypass list, for pull requests only. Read back as the AI account, for
+  both rule sets: "can the AI account get past it: never". Not yet proven
+  by a drill where the AI account tries to merge.
+- The AI account keeps "write". For a project owned by a personal
+  account, GitHub offers helpers no lower level.
+
+What still depends on Ernie reading each question (drill 20): file
+changes and Python in this project (rules 4 and 7), and the app's own
+questions. What holds without any click: the blocked rules (2, 3, 5 and
+6), the lock on GitHub, and the tamper check. Other known limits: command
+rules match text, so a script can do what its command line doesn't show
+(section 6); the check script's window flashes on the screen; the mode
+switches in thread 02 are still unexplained.
+
+Result: build steps 1 to 6 are done. Every drill passed, or this section
+says why not.

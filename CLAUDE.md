@@ -56,3 +56,5 @@ this folder.
   guards", and sits in the "Document Manager" sidebar group.
 - At the end of a thread, its entry in docs/threads.md is added or updated
   through a pull request.
+- Don't archive threads until the project is operational (Ernie,
+  2026-09-30).

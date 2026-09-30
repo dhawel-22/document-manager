@@ -1,0 +1,5 @@
+# Made by Python and the test tool on this computer; never stored in Git
+# (D-019).
+.venv/
+__pycache__/
+.pytest_cache/

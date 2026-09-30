@@ -298,9 +298,9 @@ try {
     $here = (Test-Inside ([string]$in.cwd) $ProjectRoot) -or (Test-Inside ([string]$env:CLAUDE_PROJECT_DIR) $ProjectRoot)
 
     if (-not $here) {
-        # Rule 5: changes to this folder's files ask first, whichever thread makes them
-        if ($filePath -and (Test-Inside $filePath $ProjectRoot)) { Ask 'a thread working elsewhere is changing a file in the document-manager folder (rule 5)' }
-        if ($command -and $plain.ToLowerInvariant().Contains($ProjectRoot)) { Ask 'a command from a thread working elsewhere names the document-manager folder (rule 5)' }
+        # Rule 5: a thread working elsewhere can't change this folder's files (blocked, not asked: drill 20)
+        if ($filePath -and (Test-Inside $filePath $ProjectRoot)) { Block 'a thread working elsewhere is changing a file in the document-manager folder (rule 5)' }
+        if ($command -and $plain.ToLowerInvariant().Contains($ProjectRoot)) { Block 'a command from a thread working elsewhere names the document-manager folder (rule 5)' }
         exit 0
     }
 

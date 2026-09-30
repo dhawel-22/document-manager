@@ -1,6 +1,6 @@
 # The guards: a plain-words guide
 
-**Version:** 1.6 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.7 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "02 · Guards build"
 **Changes:** v1.1 (2026-09-26): the check script's test cases added. Made
@@ -14,6 +14,8 @@ v1.5 (2026-09-27): install and undo scripts, and how Ernie runs them. Made
 through a pull request.
 v1.6 (2026-09-27): how to answer the app's questions; three open questions
 answered. Made through a pull request.
+v1.7 (2026-09-29): rule 5 blocks instead of asking (drill 20). Made through a
+pull request.
 
 This guide says what each guard does. The other files in this folder must
 match it. The plan is `docs/01-guards-plan.md`. Every guard stays "On trust"
@@ -42,9 +44,11 @@ projects keep working as before.
 4. Claude asks before every file change and every command that changes
    something. Look-only commands, like checking status, run without a
    click. Helper agents follow the same rules. Drills 1, 11 and 12.
-5. Changes to files in this folder ask first, whichever thread makes them,
-   even one working in another folder. For commands, the check looks for
-   this folder's path in the command text (plan section 6). Drill 20.
+5. A thread working in another folder can't change this folder's files:
+   the check blocks it, with no question. For commands, the check looks for
+   this folder's path in the command text (plan section 6). Drill 20: a
+   question alone didn't stop it, because questions were approved without
+   being read (2026-09-29).
 6. Blocked outright, even if Ernie clicks "allow":
    - pushing to main, force pushes, and deleting branches on GitHub
      (drills 6, 7 and 16)

@@ -13,9 +13,9 @@ T11,elsewhere,acceptEdits,Edit,D:\python\projects\vsa_edge\notes.md,normal,Other
 T12,here,default,Bash,git status,normal,Rule 4: look-only; the app's usual rules decide
 T13,here,default,PowerShell,Get-ChildItem docs,normal,Rule 4: look-only
 T14,here,default,Edit,D:\python\projects\document-manager\docs\threads.md,ask,"Rule 4: every file change here asks first (the app's own question doesn't appear, drill 1)"
-T15,elsewhere,default,PowerShell,Set-Content D:\python\projects\document-manager\notes.txt -Value hi,ask,Rule 5: a thread elsewhere changing this folder's files asks first
-T16,elsewhere,acceptEdits,Write,D:\python\projects\document-manager\notes.txt,ask,Rule 5: the same with Claude's file tools
-T17,elsewhere,default,Bash,cat /d/python/projects/document-manager/CLAUDE.md,ask,"Rule 5: the check can't always tell reading from changing, so it asks"
+T15,elsewhere,default,PowerShell,Set-Content D:\python\projects\document-manager\notes.txt -Value hi,block,Rule 5: a thread elsewhere can't change this folder's files (drill 20)
+T16,elsewhere,acceptEdits,Write,D:\python\projects\document-manager\notes.txt,block,Rule 5: the same with Claude's file tools
+T17,elsewhere,default,Bash,cat /d/python/projects/document-manager/CLAUDE.md,block,"Rule 5: the check can't always tell reading from changing, so it blocks"
 T18,here,default,Bash,git push origin main,block,Rule 6: no pushing to main
 T19,here,default,Bash,git -C . push origin HEAD:main,block,"Rule 6: the same, written another way"
 T20,here,default,Bash,git push --force origin my-branch,block,Rule 6: no force pushes

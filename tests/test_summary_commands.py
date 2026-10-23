@@ -11,7 +11,8 @@ from pathlib import Path
 import docx
 
 from document_manager.__main__ import main
-
+from document_manager.register import register_folder
+from document_manager.summaries import saved_summaries, summarize_folder
 PROJECT = Path(__file__).resolve().parent.parent
 OLD_FORMAT = bytes.fromhex("D0CF11E0A1B11AE1") + bytes(504)
 OLD_REASON = "old Word file (.doc); save it as .docx in Word first"
@@ -123,3 +124,17 @@ def test_sm8_the_commands_work_as_written(tmp_path):
         assert run.returncode == 0, run.stdout + run.stderr
     assert runs[1].stdout.startswith("Summarized: 3, unchanged: 0, couldn't read: 1.")
     assert "odd.docx" in runs[2].stdout and "Risk" in runs[2].stdout
+
+
+def test_sm8_same_order_as_summarize_ignoring_capitals(tmp_path):
+    docs = tmp_path / "docs"
+    (docs / "letters").mkdir(parents=True)
+    for place in ("Weekly.docx", "letters/note.docx", "apple.docx"):
+        made = docx.Document()
+        made.add_paragraph("Text.")
+        made.save(docs / place)
+    reg = tmp_path / "register.db"
+    register_folder(docs, reg)
+    order = ["apple.docx", "letters/note.docx", "Weekly.docx"]
+    assert summarize_folder(docs, reg).summarized == order
+    assert [s.place for s in saved_summaries(docs, reg)] == order

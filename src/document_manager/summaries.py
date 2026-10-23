@@ -125,3 +125,50 @@ def _row(place: str, fp: str | None, now: str, summary: Summary | None,
     headings = json.dumps(summary.headings, ensure_ascii=False)
     return (place, fp, now, METHOD, summary.title, headings,
             summary.first_words, summary.word_count, None)
+
+
+@dataclass
+class SavedSummary:
+    """A document's latest saved summary (SM-8). Places are like letters/report.docx."""
+
+    place: str
+    made_at: str  # date and time, UTC
+    title: str | None  # None when it couldn't be read
+    headings: list[tuple[int, str]]
+    first_words: str | None
+    word_count: int | None
+    problem: str | None  # why it couldn't be read (SM-6)
+
+
+def saved_summaries(folder: Path | str, register_file: Path | str) -> list[SavedSummary]:
+    """Each document's latest summary, in order of place (SM-8).
+
+    The register file is opened read-only: showing changes nothing. An
+    unregistered folder is refused (SM-7).
+    """
+    folder = Path(folder).resolve(strict=True)
+    if not folder.is_dir():
+        raise NotADirectoryError(f"Not a folder: {folder}")
+    register_file = Path(register_file).resolve(strict=True)
+    con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
+    try:
+        folder_id = _registered(con, folder)
+        has_summaries = con.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'summary'"
+        ).fetchone()
+        if not has_summaries:  # a version 1 register file: nothing summarized yet
+            return []
+        rows = con.execute(
+            "SELECT path, made_at, title, headings, first_words, word_count, problem"
+            " FROM summary AS s WHERE folder_id = ? AND id = (SELECT MAX(id) FROM summary"
+            " WHERE folder_id = s.folder_id AND path = s.path) ORDER BY path",
+            (folder_id,),
+        )
+        return [
+            SavedSummary(place, made_at, title,
+                         [tuple(h) for h in json.loads(headings)] if headings else [],
+                         first_words, word_count, problem)
+            for place, made_at, title, headings, first_words, word_count, problem in rows
+        ]
+    finally:
+        con.close()

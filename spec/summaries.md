@@ -77,5 +77,6 @@ Commands (v1.3), from PowerShell in the project folder:
 - Both work exactly as written; a test runs them that way (like RP-5). A
   problem is said in one plain line (like RP-4).
 - Characters the window can't show appear as "?"; the summary in the
-  register file is unchanged.- Both list documents in the same order: folder by folder, ignoring
+  register file is unchanged.
+- Both list documents in the same order: folder by folder, ignoring
   capitals.

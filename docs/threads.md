@@ -117,11 +117,14 @@ switched in thread 02; why the PowerShell command swapped the file names
 and contents; old branches on GitHub; the leftover name in the app's copy;
 open questions 2–6.
 
-## 04 · Finish Phase 0 (2026-09-29 to 2026-09-30)
+## 04 · Finish Phase 0 (2026-09-29 to 2026-10-23)
 Purpose: finish the guards plan: the last drills, the GitHub website steps
-and the scorecard.
+and the scorecard. Then (2026-10-23) the first feature: summaries of Word
+documents.
 Decided: rule 5 blocks instead of asking (drill 20); only Ernie can change
-main on GitHub (rule set only-ernie-merges).
+main on GitHub (rule set only-ernie-merges); summaries of Word documents,
+Stage A only: everything stays on this computer, documents are only read
+(SM-5), and AI summaries stay off until Ernie decides (SM-9).
 Done:
 - Drill 13 passed: the tamper check caught a changed guard file.
 - Drill 18 passed in another folder: Python ran with no question.
@@ -135,7 +138,14 @@ Done:
   with four open questions (#35).
 - The drill thread "New session" (in D:\python\projects\New folder) was
   archived, then brought back: no archiving until the project is
-  operational (CLAUDE.md).
+  operational (CLAUDE.md).- Summaries of Word documents (spec/summaries.md, #38 to #43): the rules
+  (#38); the library that reads Word documents, python-docx 1.2.0 (#39);
+  one document's summary (#40); saving summaries in the register file,
+  now version 2 (#41); the summarize and summaries commands (#42); both
+  lists in the same order (#43).
+- A demo on fake documents, run the way Ernie would type it: every rule
+  behaved as written, and the fake documents' fingerprints were the same
+  before and after. 61 tests pass.
 Lessons:
 - A question box protects only if it's read. What matters must be
   blocked, or go through a pull request.
@@ -150,12 +160,24 @@ Lessons:
   PowerShell 7. Run it from Git Bash.
 - One step at a time, each confirmed before the next, works for Ernie.
 - The rule set only-ernie-merges stops even Ernie until he ticks "bypass
-  rules"; only he has that box (how-a-change-happens v1.3).
-Open: the four questions of the reuse plan (docs/02-reuse-plan.md,
-section 7); a drill where the AI account tries to merge; rules 4 and 7
-still only ask; the flashing check script window; tools from the opening
-document not set up yet (GitHub Actions, pre-commit, Pydantic/pandera,
-check-out/check-in scripts); why the mode switched in thread 02; why the
-PowerShell command swapped the file names and contents (thread 03); old
-branches on GitHub; the leftover name in the app's copy; open questions
-2–6.
+  rules"; only he has that box (how-a-change-happens v1.3).- After a three-week break, the thinking setting was "medium", not "max"
+  (D-021). Check it at the start, like the mode.
+- The Word library makes up the title "Word Document" for a document that
+  has none. Read the library's own code before trusting what it returns.
+- Splitting the biggest step into three small pull requests (#40 to #42)
+  kept each one short enough to show in full.
+- The demo found the sort order that the tests missed. Keep running
+  demos the way Ernie types.
+- pip used copies already on this computer instead of downloading. Say
+  what actually happened, not what was planned.
+Open: whether to start Phase 1 (the window), with or without GitHub
+Actions first; trying summaries on a real folder, read-only; AI summaries
+(Stage B); numbers in names sort character by character ("Report 10"
+before "Report 2"); the four questions of the reuse plan
+(docs/02-reuse-plan.md, section 7); a drill where the AI account tries to
+merge; rules 4 and 7 still only ask; the flashing check script window;
+tools from the opening document not set up yet (GitHub Actions,
+pre-commit, Pydantic/pandera, check-out/check-in scripts); why the mode
+switched in thread 02; why the PowerShell command swapped the file names
+and contents (thread 03); old branches on GitHub; the leftover name in the
+app's copy; open questions 2–6.

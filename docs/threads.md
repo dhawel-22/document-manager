@@ -138,7 +138,8 @@ Done:
   with four open questions (#35).
 - The drill thread "New session" (in D:\python\projects\New folder) was
   archived, then brought back: no archiving until the project is
-  operational (CLAUDE.md).- Summaries of Word documents (spec/summaries.md, #38 to #43): the rules
+  operational (CLAUDE.md).
+- Summaries of Word documents (spec/summaries.md, #38 to #43): the rules
   (#38); the library that reads Word documents, python-docx 1.2.0 (#39);
   one document's summary (#40); saving summaries in the register file,
   now version 2 (#41); the summarize and summaries commands (#42); both
@@ -160,7 +161,8 @@ Lessons:
   PowerShell 7. Run it from Git Bash.
 - One step at a time, each confirmed before the next, works for Ernie.
 - The rule set only-ernie-merges stops even Ernie until he ticks "bypass
-  rules"; only he has that box (how-a-change-happens v1.3).- After a three-week break, the thinking setting was "medium", not "max"
+  rules"; only he has that box (how-a-change-happens v1.3).
+- After a three-week break, the thinking setting was "medium", not "max"
   (D-021). Check it at the start, like the mode.
 - The Word library makes up the title "Word Document" for a document that
   has none. Read the library's own code before trusting what it returns.
@@ -184,3 +186,60 @@ app's copy; open questions 2–6.
 Next: 05 · The window (Phase 1). First, Ernie decides whether GitHub
 Actions (automatic checks on GitHub) comes first; then the window toolkit
 (PySide6 or Tkinter); then the window's rules in spec/, for his approval.
+
+## 05 · Automatic checks and the toolkit (2026-10-23)
+Purpose: start Phase 1: decide on automatic checks, then the window
+toolkit. The window itself moved to thread 06 (Ernie).
+Decided: automatic checks before the window, and D-022, the window uses
+PySide6, tested with pytest-qt. Both On trust: Claude recommended, Ernie
+accepted (D-015).
+Done:
+- Automatic checks (#47): on every pull request and every change to
+  main, GitHub runs the tests on its own Windows computer, with Python
+  3.12.8 as here, and shows a green tick or a red cross. The checks can
+  only read the project.
+- The AI account got the "workflow" permission that check files need,
+  through a new sign-in that Ernie approved as dhawel-22-claude.
+- The card v1.4 (#48): step 3 checks that GitHub shows dhawel-22 and
+  waits for the green tick.
+- D-022 in the opening document v1.7 (#49).
+- All six check runs passed: on #47, #48 and #49, and on main after
+  each merge.
+Lessons:
+- At the start, the mode was "Accept edits" and thinking "medium" again.
+  The start-of-thread check caught both; Ernie switched them.
+- Check files need the "workflow" permission. GitHub refused the first
+  send; Claude missed it when drafting.
+- The GitHub tool here still has the old name "dhawel-22" saved, so a
+  quick refresh of the sign-in can't work (read in the tool's own code).
+  A fresh sign-in worked: '' | gh auth login --hostname github.com
+  --git-protocol https --scopes workflow --web. It asks nothing and
+  opens no browser.
+- The guards block Claude from changing the GitHub sign-in (rule 6), so
+  that step is Ernie's.
+- GitHub's sign-in page offered dhawel-22 twice. Approving there would
+  have given Claude Ernie's account. Read the name on every page.
+- GitHub never lets the author approve a pull request: approve as
+  dhawel-22 (card v1.4).
+- Steps without the reason lost Ernie, and he stopped the thread. Say
+  why first, in a few lines. Open the terminal beside the chat and read
+  it, instead of asking Ernie to copy what it says.
+- "I followed your recommendation" is On trust (D-015). The first D-022
+  draft said "Ernie picked"; it was corrected before the change.
+- #49 was merged before its check finished. It passed, but wait for the
+  tick once code changes start.
+Open: the old name "dhawel-22" saved in the GitHub tool; old branches on
+GitHub, now also automatic-checks, card-v1-4 and d-022-pyside6; making
+the check required before merging (a website step for Ernie); trying
+summaries on a real folder, read-only; AI summaries (Stage B); numbers
+in names sort character by character ("Report 10" before "Report 2");
+the four questions of the reuse plan (docs/02-reuse-plan.md, section 7);
+a drill where the AI account tries to merge; rules 4 and 7 still only
+ask; the flashing check script window; tools from the opening document
+not set up yet (pre-commit, Pydantic/pandera, check-out/check-in
+scripts); why the mode switched in thread 02; why the PowerShell command
+swapped the file names and contents (thread 03); open questions 2–6.
+Next: 06 · The first window. First, the window's rules in spec/, for
+Ernie's approval (a picture of the planned window can come first, in
+chat); then PySide6 and pytest-qt at exact versions; then the first
+window and its tests.

@@ -181,3 +181,6 @@ pre-commit, Pydantic/pandera, check-out/check-in scripts); why the mode
 switched in thread 02; why the PowerShell command swapped the file names
 and contents (thread 03); old branches on GitHub; the leftover name in the
 app's copy; open questions 2–6.
+Next: 05 · The window (Phase 1). First, Ernie decides whether GitHub
+Actions (automatic checks on GitHub) comes first; then the window toolkit
+(PySide6 or Tkinter); then the window's rules in spec/, for his approval.

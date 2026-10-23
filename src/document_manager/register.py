@@ -7,8 +7,10 @@ from pathlib import Path
 
 from document_manager.fingerprint import fingerprint
 
-SCHEMA = Path(__file__).with_name("register.sql")
-VERSION = 1
+# Each step brings a register file up one version: register.sql makes
+# version 1, and register-2.sql adds the summaries (version 2).
+STEPS = [Path(__file__).with_name(name) for name in ("register.sql", "register-2.sql")]
+VERSION = len(STEPS)
 
 
 def register_folder(folder: Path | str, register_file: Path | str) -> int:
@@ -33,7 +35,7 @@ def register_folder(folder: Path | str, register_file: Path | str) -> int:
     con = sqlite3.connect(register_file)
     try:
         with con:
-            _prepare(con)
+            prepare_register(con)
             known = con.execute("SELECT 1 FROM folder WHERE path = ?", (str(folder),))
             if known.fetchone():
                 raise ValueError(f"{folder} is already registered (RG-5)")
@@ -65,10 +67,11 @@ def all_files(folder: Path) -> list[Path]:
     return sorted(found)
 
 
-def _prepare(con: sqlite3.Connection) -> None:
-    """Create the tables in a new register file, or check an existing one's version."""
+def prepare_register(con: sqlite3.Connection) -> None:
+    """Create the tables in a new register file, or bring an older one up to
+    the current version, one step at a time."""
     version = con.execute("PRAGMA user_version").fetchone()[0]
-    if version == 0:
-        con.executescript(SCHEMA.read_text(encoding="utf-8"))
-    elif version != VERSION:
+    if version > VERSION:
         raise ValueError(f"Unknown register file version: {version}")
+    for step in STEPS[version:]:
+        con.executescript(step.read_text(encoding="utf-8"))

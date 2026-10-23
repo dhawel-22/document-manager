@@ -1,9 +1,11 @@
 # Summaries
 
-**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "04 · Finish Phase 0"
 **Changes:** v1.1 (2026-10-23): details for SM-3 and SM-6, below. Made
+through a pull request.
+v1.2 (2026-10-23): details for saving, and for older register files. Made
 through a pull request.
 
 The summaries feature finds the Word documents in a registered folder,
@@ -52,3 +54,9 @@ Details (v1.1):
 - "Couldn't read" reasons (SM-6): an old Word file (.doc); protected with a
   password, or not a real .docx inside; Word's temporary lock file (a name
   starting with "~$"); or the error, word for word.
+- Saving (SM-2, SM-4): each summary is a new row; old rows are never
+  changed or deleted. A document that still can't be read, for the same
+  reason, isn't saved again.
+- Register files made before summaries (version 1) get the summaries table
+  the first time a folder in them is summarized. The check reads them as
+  they are, and never changes them (CK-6).

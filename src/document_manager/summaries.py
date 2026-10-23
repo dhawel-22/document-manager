@@ -161,10 +161,10 @@ def saved_summaries(folder: Path | str, register_file: Path | str) -> list[Saved
         rows = con.execute(
             "SELECT path, made_at, title, headings, first_words, word_count, problem"
             " FROM summary AS s WHERE folder_id = ? AND id = (SELECT MAX(id) FROM summary"
-            " WHERE folder_id = s.folder_id AND path = s.path) ORDER BY path",
+            " WHERE folder_id = s.folder_id AND path = s.path)",
             (folder_id,),
         )
-        return [
+        summaries = [
             SavedSummary(place, made_at, title,
                          [tuple(h) for h in json.loads(headings)] if headings else [],
                          first_words, word_count, problem)
@@ -172,3 +172,9 @@ def saved_summaries(folder: Path | str, register_file: Path | str) -> list[Saved
         ]
     finally:
         con.close()
+    return sorted(summaries, key=lambda s: _folder_order(s.place))
+
+
+def _folder_order(place: str) -> list[str]:
+    """The order summarize uses: folder by folder, ignoring capitals."""
+    return place.lower().split("/")

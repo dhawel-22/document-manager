@@ -1,6 +1,6 @@
 # Summaries
 
-**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.4 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "04 · Finish Phase 0"
 **Changes:** v1.1 (2026-10-23): details for SM-3 and SM-6, below. Made
@@ -8,6 +8,8 @@ through a pull request.
 v1.2 (2026-10-23): details for saving, and for older register files. Made
 through a pull request.
 v1.3 (2026-10-23): the two commands. Made through a pull request.
+v1.4 (2026-10-23): summaries lists documents in the same order as
+summarize. Made through a pull request.
 
 The summaries feature finds the Word documents in a registered folder,
 reads them, and saves each one's location and summary in the register file
@@ -75,4 +77,5 @@ Commands (v1.3), from PowerShell in the project folder:
 - Both work exactly as written; a test runs them that way (like RP-5). A
   problem is said in one plain line (like RP-4).
 - Characters the window can't show appear as "?"; the summary in the
-  register file is unchanged.
+  register file is unchanged.- Both list documents in the same order: folder by folder, ignoring
+  capitals.

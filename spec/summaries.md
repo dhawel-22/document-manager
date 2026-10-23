@@ -1,7 +1,10 @@
 # Summaries
 
-**Version:** 1.0 (draft) · **Owner:** Ernie
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+pull request that added this file
 **Drafted by:** Claude, in thread "04 · Finish Phase 0"
+**Changes:** v1.1 (2026-10-23): details for SM-3 and SM-6, below. Made
+through a pull request.
 
 The summaries feature finds the Word documents in a registered folder,
 reads them, and saves each one's location and summary in the register file
@@ -34,3 +37,18 @@ On trust (technical):
 - Word documents are read with `python-docx`, a widely used free library,
   pinned to one exact version in `requirements-dev.txt`.
 - The summaries go in a new table in the same register file.
+
+Details (v1.1):
+- Title (SM-3): the title saved in the document itself (in Word: File,
+  Info, Title). If there's none, the first paragraph styled "Title". If
+  there's neither, the summary says "no title". The library on its own
+  would make up the title "Word Document" in that case, so the title is
+  read directly.
+- Headings (SM-3): the paragraphs styled "Heading 1" to "Heading 9", in
+  order, with their level.
+- Words (SM-3): counted in the main text, tables included, in the order
+  they appear; a merged table cell counts once. Headers, footers,
+  footnotes, comments and text boxes aren't read.
+- "Couldn't read" reasons (SM-6): an old Word file (.doc); protected with a
+  password, or not a real .docx inside; Word's temporary lock file (a name
+  starting with "~$"); or the error, word for word.

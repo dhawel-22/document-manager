@@ -58,3 +58,6 @@ this folder.
   through a pull request.
 - Don't archive threads until the project is operational (Ernie,
   2026-09-30).
+- "next item" in a new thread: read the last entry in docs/threads.md,
+  rename the thread right away to the name on its "Next:" line, then say
+  in a few lines what comes first and carry on from there.

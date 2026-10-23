@@ -41,7 +41,7 @@ def _listed_files(folder: Path, register_file: Path) -> dict[str, str]:
     con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
     try:
         version = con.execute("PRAGMA user_version").fetchone()[0]
-        if version != VERSION:
+        if not 1 <= version <= VERSION:  # version 1 files are read as they are
             raise ValueError(f"Unknown register file version: {version}")
         row = con.execute(
             "SELECT id FROM folder WHERE path = ?", (str(folder),)

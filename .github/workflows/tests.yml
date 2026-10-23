@@ -1,0 +1,38 @@
+# Automatic checks: on every pull request, and on every change to main,
+# GitHub runs the tests on its own Windows computer. The pull request page
+# then shows a green tick if they pass, or a red cross if they don't.
+# The steps are the same as in requirements-dev.txt (D-019).
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# The checks can read the project, but never change it.
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Run the tests
+    runs-on: windows-2025
+    # Stop after 15 minutes if something hangs.
+    timeout-minutes: 15
+    steps:
+      # The two steps written by GitHub are fixed by their fingerprints,
+      # so they can't change unless a pull request changes them.
+      - name: Get the project
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false  # don't keep GitHub's key in the copy
+      - name: Get Python 3.12.8, the same as on Ernie's computer
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12.8"
+      - name: Make the project's own Python (.venv)
+        run: python -m venv .venv
+      - name: Install the libraries, at exact versions
+        run: .venv\Scripts\python -m pip install -r requirements-dev.txt
+      - name: Run the tests
+        run: .venv\Scripts\python -m pytest

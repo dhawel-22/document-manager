@@ -355,3 +355,59 @@ names and contents (thread 03); open questions 2–6.
 Next: 08 · Before Phase 2. First, the bypass test's result and whether
 Phase 1 passes (Ernie); then whether the register needs a way to accept
 a change (Ernie); then the rules for it in spec/, if so.
+
+## 08 · Before Phase 2 (2026-10-23)
+Purpose: the bypass test and whether Phase 1 passes; a way to accept a
+change in the register.
+Decided: Phase 1 passes, and the bypass rule: wait for the green tick,
+then tick "bypass rules", then merge (Ernie); accepting a change,
+spec/accept.md, AC-1 to AC-9 (Ernie); the routine stays as it is
+(Ernie); Phase 2 starts with a Google Drive test folder (Ernie).
+Done:
+- The Phase 1 scorecard v1.1 (#60): Phase 1 passes; the bypass rule.
+- Accepting a change: the rules (#61); the engine, with register file
+  version 3 (#62); the accept command (#63); the Accept button (#64).
+- A try-out by Ernie in the window on spec: Check showed 2 changed and 1
+  new; Accept saved a new list of 7 files; Check then said nothing had
+  changed. Every spec file's fingerprint, size and last-changed time was
+  the same before and after.
+- The try-out found that a refused Register still brought the register
+  file up to version 3. Fixed (#65); its new test failed on the old code
+  first. 106 tests pass.
+Lessons:
+- At the start, thinking was "medium" again.
+- The bypass tick showed on #59 while the check ran. Whether it would skip
+  the check wasn't tried; the rule above makes it not matter.
+- The mode switched to "Accept edits" twice, after #63 and #64 were
+  merged. The guards blocked work both times (rule 3). Cause not found.
+- Ernie's manager raised the cost; the project is on probation to
+  deliver. Too many questions cost Ernie time: bundle the steps, ask once.
+- The try-out found a flaw the tests missed, again. Keep the try-outs.
+- Copying drafts from the scratch folder brought Windows line endings
+  once; they were removed before the commit. The guards blocked a
+  forced branch delete and a git checkout; safe ways worked.
+- Claude said 3 files had changed in spec; Check showed 2 changed and 1
+  new. Count from the record.
+Open: Check on docs shows 3 changes and on spec 1 (register.md, #65),
+all from merged pull requests, for Ernie to accept; Google Docs and
+Sheets show as small shortcut files, and online-only files download when
+read; why the mode switches after merges; the register file
+D:\python\document-manager-register.db stays (now version 3); big folders
+(the window waits while a command runs); the register file picker's
+button says "Save"; "Starts" in a summary includes headings (SM-3),
+Ernie to decide; the demo folder D:\python\demo-window stays until Ernie
+deletes it; old branches on GitHub, now also thread-07-log,
+phase-1-result, accept-rules, accept-engine, accept-command,
+accept-button and register-refusal; the old name "dhawel-22" saved in
+the GitHub tool; AI summaries (Stage B); numbers in names sort character
+by character ("Report 10" before "Report 2"); the four questions of the
+reuse plan (docs/02-reuse-plan.md, section 7); a drill where the AI
+account tries to merge; rules 4 and 7 still only ask; the flashing check
+script window; tools from the opening document not set up yet
+(pre-commit, Pydantic/pandera, check-out/check-in scripts); why the
+PowerShell command swapped the file names and contents (thread 03); open
+questions 2–6.
+Next: 09 · Phase 2: a Google Drive test folder. First, Ernie picks a
+small test folder in G:\My Drive; then Register, Check, Summarize and
+Accept on it in the window, read-only, with every file's fingerprint
+checked before and after.

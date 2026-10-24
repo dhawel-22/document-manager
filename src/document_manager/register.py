@@ -36,10 +36,11 @@ def register_folder(folder: Path | str, register_file: Path | str) -> int:
     con = sqlite3.connect(register_file)
     try:
         with con:
-            prepare_register(con)
-            known = con.execute("SELECT 1 FROM folder WHERE path = ?", (str(folder),))
-            if known.fetchone():
+            # Refuse before the register file is brought up to date, so a
+            # refused folder leaves it exactly as it was (RG-5).
+            if is_registered(con, folder):
                 raise ValueError(f"{folder} is already registered (RG-5)")
+            prepare_register(con)
             now = datetime.now(timezone.utc).isoformat(timespec="seconds")
             folder_id = con.execute(
                 "INSERT INTO folder (path, registered_at) VALUES (?, ?)",
@@ -53,6 +54,19 @@ def register_folder(folder: Path | str, register_file: Path | str) -> int:
     finally:
         con.close()
     return len(files)
+
+
+def is_registered(con: sqlite3.Connection, folder: Path) -> bool:
+    """Whether the folder is in the register file. A new register file has
+    no folder table yet."""
+    has_table = con.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'folder'"
+    ).fetchone()
+    if not has_table:
+        return False
+    return con.execute(
+        "SELECT 1 FROM folder WHERE path = ?", (str(folder),)
+    ).fetchone() is not None
 
 
 def list_files(folder: Path) -> list[tuple[str, int, str]]:

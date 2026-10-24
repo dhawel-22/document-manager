@@ -296,3 +296,62 @@ thread 02; why the PowerShell command swapped the file names and contents
 Next: 07 · The project's own documents (Phase 1). First, GitHub waits
 for the green tick, one screen at a time; then the window on the
 project's own documents, read-only; then the Phase 1 scorecard.
+
+## 07 · The project's own documents (2026-10-23)
+Purpose: GitHub waits for the green tick; the window on the project's
+own documents, read-only; the Phase 1 scorecard.
+Decided, all On trust (Claude recommended, Ernie accepted, D-015): the
+project's own documents are docs and spec, with the register file at
+D:\python\document-manager-register.db, outside the project; the rule
+that waits for the tick leaves its two smaller options off; the card
+change as the test of the lock.
+Done:
+- GitHub waits for the green tick: Ernie added "Require status checks
+  to pass" to the rule set protect-main, with "Run the tests" from
+  GitHub Actions. Read back from GitHub; Ernie's picture shows its
+  bypass list is empty.
+- The window on the project's own documents: Ernie registered and
+  checked docs (5 files) and spec (6 files). Every file's fingerprint,
+  size and last-changed time was the same before and after, the
+  register's list matched fingerprints worked out separately, and the
+  register file was the only new file.
+- The Phase 1 scorecard, docs/03-phase-1-scorecard.md (#57). After the
+  merge, Check on docs found exactly the new file, and nothing else.
+- The card v1.5 (#58): GitHub won't merge until the tick is green.
+- On #58, GitHub marked "Run the tests" Required, and merging stayed
+  blocked after Ernie approved, while the check ran. The "bypass rules"
+  tick wasn't tried in that time.
+Lessons:
+- At the start, thinking was "medium" again; Ernie switched it to "max".
+- In thread 06, nine website steps in one message failed without a
+  trace. One screen at a time, with a picture of each, worked: twice the
+  small "Add checks" box was still open, and the save went through once
+  it was closed. Whether that box caused the old failure is unknown.
+- The database tool's output has Windows line endings, so the first
+  comparison said "different". Find out why before reporting a
+  difference.
+- The check takes about a minute, so the lock is hard to catch. On #57
+  the check finished first; on #58, half of the test was seen.
+- After the check finished, the bypass box appeared only after a reload.
+Open: whether the "bypass rules" tick can skip the check, tried on this
+entry's pull request; Phase 1 passes when that shows as expected
+(scorecard section 5); a way to accept a change before Phase 2
+(scorecard section 4), Ernie to decide; the register file
+D:\python\document-manager-register.db stays; the two speed-ups, if the
+pace stays too slow; big folders (the window waits while a command
+runs); the register file picker's button says "Save"; "Starts" in a
+summary includes headings (SM-3), Ernie to decide; the demo folder
+D:\python\demo-window stays until Ernie deletes it; old branches on
+GitHub, now also thread-06-log, phase-1-scorecard and card-v1-5; the old
+name "dhawel-22" saved in the GitHub tool; trying summaries on a real
+folder, read-only; AI summaries (Stage B); numbers in names sort
+character by character ("Report 10" before "Report 2"); the four
+questions of the reuse plan (docs/02-reuse-plan.md, section 7); a drill
+where the AI account tries to merge; rules 4 and 7 still only ask; the
+flashing check script window; tools from the opening document not set up
+yet (pre-commit, Pydantic/pandera, check-out/check-in scripts); why the
+mode switched in thread 02; why the PowerShell command swapped the file
+names and contents (thread 03); open questions 2–6.
+Next: 08 · Before Phase 2. First, the bypass test's result and whether
+Phase 1 passes (Ernie); then whether the register needs a way to accept
+a change (Ernie); then the rules for it in spec/, if so.

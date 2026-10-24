@@ -1,9 +1,10 @@
-"""Run the program (spec/report.md, spec/summaries.md):
+"""Run the program (spec/report.md, spec/summaries.md, spec/window.md):
 
     python -m document_manager register <folder> <register file>
     python -m document_manager check <folder> <register file>
     python -m document_manager summarize <folder> <register file>
     python -m document_manager summaries <folder> <register file>
+    python -m document_manager window
 """
 
 import sqlite3
@@ -17,11 +18,16 @@ from document_manager.summary_report import summaries_report, summarize_report
 
 COMMANDS = ("register", "check", "summarize", "summaries")
 USAGE = ("Use: python -m document_manager register|check|summarize|summaries"
-         " <folder> <register file>")
+         " <folder> <register file>, or: python -m document_manager window")
 
 
 def main(args: list[str]) -> int:
     """Run one command. Returns 0 when it worked, 1 on a problem (RP-4)."""
+    if args == ["window"]:
+        # The window's library is loaded only when the window is wanted.
+        from document_manager.window import open_window
+
+        return open_window()  # WN-1
     if len(args) != 3 or args[0] not in COMMANDS:
         print(USAGE)
         return 2

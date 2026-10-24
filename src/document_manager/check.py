@@ -23,11 +23,17 @@ def check_folder(folder: Path | str, register_file: Path | str) -> CheckResult:
     folder = Path(folder).resolve(strict=True)
     if not folder.is_dir():
         raise NotADirectoryError(f"Not a folder: {folder}")
-    listed = _listed_files(folder, Path(register_file).resolve(strict=True))
+    listed = listed_files(folder, Path(register_file).resolve(strict=True))
     now = {
         path.relative_to(folder).as_posix(): fingerprint(path)
         for path in all_files(folder)
     }
+    return compare(listed, now)
+
+
+def compare(listed: dict[str, str], now: dict[str, str]) -> CheckResult:
+    """Sort each place into changed, new, missing or unchanged (CK-1 to CK-5).
+    Both lists give each place's fingerprint."""
     return CheckResult(
         changed=sorted(p for p in now if p in listed and now[p] != listed[p]),
         new=sorted(p for p in now if p not in listed),
@@ -36,8 +42,9 @@ def check_folder(folder: Path | str, register_file: Path | str) -> CheckResult:
     )
 
 
-def _listed_files(folder: Path, register_file: Path) -> dict[str, str]:
-    """The folder's list from the register file, opened read-only (CK-6, CK-7)."""
+def listed_files(folder: Path, register_file: Path) -> dict[str, str]:
+    """The folder's newest list from the register file, opened read-only
+    (CK-1, CK-6, CK-7, AC-4)."""
     con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
     try:
         version = con.execute("PRAGMA user_version").fetchone()[0]
@@ -48,6 +55,17 @@ def _listed_files(folder: Path, register_file: Path) -> dict[str, str]:
         ).fetchone()
         if row is None:
             raise ValueError(f"{folder} is not in the register file (CK-7)")
+        if version >= 3:  # accepted lists came in version 3
+            newest = con.execute(
+                "SELECT id FROM accepted WHERE folder_id = ? ORDER BY id DESC LIMIT 1",
+                row,
+            ).fetchone()
+            if newest is not None:
+                rows = con.execute(
+                    "SELECT path, fingerprint FROM accepted_file WHERE accepted_id = ?",
+                    newest,
+                )
+                return dict(rows)
         rows = con.execute(
             "SELECT path, fingerprint FROM file WHERE folder_id = ?", row
         )

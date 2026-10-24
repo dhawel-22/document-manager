@@ -8,8 +8,12 @@ from pathlib import Path
 from document_manager.fingerprint import fingerprint
 
 # Each step brings a register file up one version: register.sql makes
-# version 1, and register-2.sql adds the summaries (version 2).
-STEPS = [Path(__file__).with_name(name) for name in ("register.sql", "register-2.sql")]
+# version 1, register-2.sql adds the summaries (version 2), and
+# register-3.sql adds accepted lists (version 3).
+STEPS = [
+    Path(__file__).with_name(name)
+    for name in ("register.sql", "register-2.sql", "register-3.sql")
+]
 VERSION = len(STEPS)
 
 
@@ -27,10 +31,7 @@ def register_folder(folder: Path | str, register_file: Path | str) -> int:
 
     # Read every file before saving anything, so an unreadable file stops
     # the whole run with nothing saved (RG-6).
-    files = [
-        (path.relative_to(folder).as_posix(), path.stat().st_size, fingerprint(path))
-        for path in all_files(folder)
-    ]
+    files = list_files(folder)
 
     con = sqlite3.connect(register_file)
     try:
@@ -52,6 +53,14 @@ def register_folder(folder: Path | str, register_file: Path | str) -> int:
     finally:
         con.close()
     return len(files)
+
+
+def list_files(folder: Path) -> list[tuple[str, int, str]]:
+    """Every file's place in the folder, size and fingerprint (RG-1)."""
+    return [
+        (path.relative_to(folder).as_posix(), path.stat().st_size, fingerprint(path))
+        for path in all_files(folder)
+    ]
 
 
 def all_files(folder: Path) -> list[Path]:

@@ -1,15 +1,17 @@
 # Window
 
-**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "06 · The first window"
 **Changes:** v1.1 (2026-10-23): the window command says one line when the
 window opens. Made through a pull request.
 v1.2 (2026-10-23): how a box's path is read, and errors the commands
 don't expect. Made through a pull request.
+v1.3 (2026-10-23): the Accept button (spec/accept.md). Made through a
+pull request.
 
-The window lets Ernie run the four commands (spec/report.md,
-spec/summaries.md) by clicking instead of typing. It's kept thin: the work
+The window lets Ernie run the five commands (spec/report.md,
+spec/summaries.md, spec/accept.md) by clicking instead of typing. It's kept thin: the work
 is done by the same engine code the commands use, and the window adds no
 rules of its own about the files. One command, from PowerShell in the
 project folder, opens it:
@@ -20,13 +22,13 @@ project folder, opens it:
 |---|---|
 | WN-1 | The command above opens the window. A test runs it that way (like RP-5). |
 | WN-2 | The window has a folder box and a register file box. Each can be typed in, or filled with "Choose…", which opens Windows' usual picker. Choosing only fills the box: it never opens, changes or makes a file. |
-| WN-3 | Four buttons, Register, Check, Summarize and Summaries, each do exactly what the command of the same name does, with the same rules, on the folder and register file in the boxes. |
+| WN-3 | Five buttons, Register, Check, Summarize, Summaries and Accept, each do exactly what the command of the same name does, with the same rules, on the folder and register file in the boxes. |
 | WN-4 | The results show the same words, in the same order, as the command prints. The tags changed, new, missing and couldn't read each have their own colour. |
 | WN-5 | Pressing a button first clears the old results, so old results are never shown as new ones. |
 | WN-6 | While a button's work runs, the status line says "Working…" and no button can be pressed. When it ends, the status line says which button ran, on which folder, and the time it finished (this computer's time). |
 | WN-7 | When something goes wrong, the status line shows the same one plain line as the command, in red, and the results stay empty: nothing is reported as fine (RP-4). |
 | WN-8 | If a box is empty, nothing runs; the status line says which box to fill. |
-| WN-9 | The window never opens, changes, moves or deletes the documents. Only Register and Summarize write anything, and only to the register file, as the commands do. |
+| WN-9 | The window never opens, changes, moves or deletes the documents. Only Register, Summarize and Accept write anything, and only to the register file, as the commands do. |
 | WN-10 | The window saves nothing of its own: no settings and no history. The boxes start empty each time it opens. |
 | WN-11 | Nothing leaves this computer. The window doesn't use the internet, and AI summaries stay off (SM-9). |
 
@@ -57,6 +59,11 @@ Details:
   "Copy as path" puts around it.
 - WN-7 (v1.2): an error the commands don't expect is shown the same way,
   starting "Problem:" with the error's name. It's never hidden.
+- Accept (v1.3): the changes show in the results, then a box asks
+  "Accept the changes shown?" with Yes and No; No is picked unless Yes is
+  clicked. The results then end with the command's last line: "Accepted
+  <folder>. Files listed: <count>." or "Nothing was saved." The question
+  shows in the box, not in the results.
 - "Choose…" for the register file can pick an existing one or name a new
   one. It never asks to replace a file, because nothing is replaced: a new
   register file is made only by Register (RG-2).

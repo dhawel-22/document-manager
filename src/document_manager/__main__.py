@@ -12,7 +12,7 @@ spec/accept.md):
 import sys
 
 from document_manager.commands import (
-    ACCEPT_QUESTION, COMMANDS, accept, changes_to_accept, run,
+    ACCEPT_QUESTION, COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run,
 )
 
 USAGE = ("Use: python -m document_manager register|check|summarize|summaries|accept"
@@ -48,7 +48,7 @@ def accept_command(folder: str, register_file: str) -> int:
     except EOFError:  # no answer at all
         answer = ""
     if answer.strip().lower() != "yes":
-        print("Nothing was saved.")
+        print(NOTHING_SAVED)
         return 0
     code, words = accept(folder, register_file, found)
     print(words)

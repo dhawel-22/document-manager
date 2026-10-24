@@ -17,6 +17,7 @@ from document_manager.summary_report import summaries_report, summarize_report
 COMMANDS = ("register", "check", "summarize", "summaries")
 PROBLEMS = (OSError, ValueError, sqlite3.Error)
 ACCEPT_QUESTION = "Accept these changes? Type yes to accept: "
+NOTHING_SAVED = "Nothing was saved."
 
 
 def run(command: str, folder: str, register_file: str) -> tuple[int, str]:

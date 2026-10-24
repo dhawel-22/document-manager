@@ -243,3 +243,56 @@ Next: 06 · The first window. First, the window's rules in spec/, for
 Ernie's approval (a picture of the planned window can come first, in
 chat); then PySide6 and pytest-qt at exact versions; then the first
 window and its tests.
+
+## 06 · The first window (2026-10-23)
+Purpose: the window's rules, its tools, and the first window, then a demo.
+Decided: the window's rules, spec/window.md, now v1.2 (Ernie); the main
+part of PySide6 (PySide6_Essentials 6.11.2) and pytest-qt 4.5.0 (On
+trust); the rest of the window in one pull request (Ernie); the process
+stays as it is for now (Ernie).
+Done:
+- The window's rules, WN-1 to WN-11 (#51), with v1.1 (#53) and v1.2 (#55).
+- The window tools (#52). Tests draw windows off screen; the automatic
+  check showed this works on GitHub's computer too.
+- The window opens (#53); the commands' words in one place (#54); the
+  four buttons, results, status line and colours (#55). 85 tests pass.
+- A demo on fake documents in D:\python\demo-window, clicked through by
+  Ernie with the real pickers: every button worked; the Word documents'
+  fingerprints were the same before and after; the register file was the
+  only file the window made.
+Lessons:
+- At the start, thinking was "medium" again; Ernie switched it to "max".
+- pip installed PySide6 from a copy stored by another project
+  (structure_reporting, 2026-09-24). Its fingerprints matched PyPI's.
+  Check where a library came from, not only that it installed.
+- Four of five merges (#51, #53, #54, #55) came before the check
+  finished; all passed. The GitHub setting that waits for the tick was
+  tried once but didn't save; the cause is unknown.
+- Ernie found the pace too slow. Shorter messages and fewer separate
+  steps helped; two bigger speed-ups (a summary instead of the full code,
+  one "go" per feature) were offered and not taken for now.
+- Testing a draft against draft code in the scratch folder, before
+  showing it, meant no corrections after "go".
+- The entry's note and pull request text weren't shown before #51,
+  against the thread 01 lesson; from #52 on they were.
+- Claude once counted the early merges wrong ("four out of four"); it was
+  four out of five. Count from the record.
+Open: GitHub waiting for the green tick (rule set protect-main); the two
+speed-ups, if the pace stays too slow; big folders (the window waits
+while a command runs); the register file picker's button says "Save";
+"Starts" in a summary includes headings (SM-3), Ernie to decide; the demo
+folder D:\python\demo-window stays until Ernie deletes it; old branches
+on GitHub, now also window-rules, window-tools, window-opens,
+commands-words and window-buttons; the old name "dhawel-22" saved in the
+GitHub tool; trying summaries on a real folder, read-only; AI summaries
+(Stage B); numbers in names sort character by character ("Report 10"
+before "Report 2"); the four questions of the reuse plan
+(docs/02-reuse-plan.md, section 7); a drill where the AI account tries to
+merge; rules 4 and 7 still only ask; the flashing check script window;
+tools from the opening document not set up yet (pre-commit,
+Pydantic/pandera, check-out/check-in scripts); why the mode switched in
+thread 02; why the PowerShell command swapped the file names and contents
+(thread 03); open questions 2–6.
+Next: 07 · The project's own documents (Phase 1). First, GitHub waits
+for the green tick, one screen at a time; then the window on the
+project's own documents, read-only; then the Phase 1 scorecard.

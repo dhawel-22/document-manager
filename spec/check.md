@@ -1,15 +1,16 @@
 # Check
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "03 · Lighter routine"
+**Changes:** v1.1 (2026-10-23): CK-1 uses the newest list (thread 08).
 
 The check compares a registered folder with its list in the register file
 (spec/register.md), to find what has changed since it was registered.
 
 | ID | Rule |
 |---|---|
-| CK-1 | Checking a registered folder compares every file in it now with its list. Files that match the list are unchanged. |
+| CK-1 | Checking a registered folder compares every file in it now with its newest list (spec/accept.md). Files that match the list are unchanged. |
 | CK-2 | A file whose fingerprint is different from the list is changed. |
 | CK-3 | A file on the list that is no longer in the folder is missing. |
 | CK-4 | A file in the folder that isn't on the list is new. |

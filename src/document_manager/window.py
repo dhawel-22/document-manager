@@ -1,4 +1,4 @@
-"""The window: the four commands as buttons (spec/window.md).
+"""The window: the commands as buttons (spec/window.md).
 
 Kept thin: the window fills in the folder and the register file, runs the
 command with run(), and shows the words run() gives back: the same code
@@ -17,15 +17,20 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPlainTextEdit,
     QPushButton,
     QWidget,
 )
 
-from document_manager.commands import COMMANDS, run
+from document_manager.commands import (
+    COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run,
+)
 
 OPEN = "The window is open. Close it to finish."  # WN-1
 WORKING = "Working…"  # WN-6
+BUTTONS = (*COMMANDS, "accept")  # WN-3
+ACCEPT_QUESTION = "Accept the changes shown?"  # AC-1
 RED = "#d13438"  # problems (WN-7)
 # The colour of each tag, found by how its lines start in the commands'
 # words (WN-4). Couldn't read has two: a line in summarize's words, and the
@@ -40,7 +45,7 @@ TAGS = {
 
 
 class Window(QWidget):
-    """The two boxes, the four buttons, the results and the status line
+    """The two boxes, the five buttons, the results and the status line
     (WN-2 to WN-8). The boxes start empty, and nothing is kept between runs
     (WN-10)."""
 
@@ -56,7 +61,7 @@ class Window(QWidget):
         self.choose_register_file_button.clicked.connect(self.choose_register_file)
         buttons = QHBoxLayout()
         self.command_buttons = {}
-        for command in COMMANDS:
+        for command in BUTTONS:
             button = QPushButton(command.capitalize())
             button.clicked.connect(lambda _checked=False, command=command: self.press(command))
             buttons.addWidget(button)
@@ -109,11 +114,15 @@ class Window(QWidget):
         self.lock(True)
         QApplication.processEvents()  # shows "Working…" before the work starts
         try:
-            code, words = run(command, folder, register_file)
+            if command == "accept":
+                code, words = self.accept(folder, register_file)
+            else:
+                code, words = run(command, folder, register_file)
         except Exception as error:  # an error the commands don't expect: shown, never hidden
             code, words = 1, f"Problem: {type(error).__name__}: {error}"
         finally:
             self.lock(False)
+        self.results.clear()  # Accept showed the changes while it asked
         if code:  # WN-7
             self.show_status(words, problem=True)
             return
@@ -121,6 +130,23 @@ class Window(QWidget):
         finished = datetime.now().strftime("%H:%M")
         self.show_status(f"{command.capitalize()} finished on {folder} at {finished}"
                          " (this computer's time).")
+
+    def accept(self, folder: str, register_file: str) -> tuple[int, str]:
+        """Show the changes, then accept them only if Yes is clicked (AC-1).
+        Returns the same words as the accept command, without its question."""
+        code, words, found = changes_to_accept(folder, register_file)
+        if found is None:  # nothing to accept (AC-6), or a problem
+            return code, words
+        self.show_results(words)
+        answer = QMessageBox.question(
+            self, "Accept", ACCEPT_QUESTION,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return 0, f"{words}\n{NOTHING_SAVED}"
+        code, saved = accept(folder, register_file, found)
+        return (code, saved) if code else (0, f"{words}\n{saved}")
 
     def lock(self, locked: bool) -> None:
         """While a command runs, no button can be pressed (WN-6)."""

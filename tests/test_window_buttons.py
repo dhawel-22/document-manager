@@ -1,4 +1,5 @@
-"""Tests for the window's buttons, spec/window.md (WN-3 to WN-9, WN-11).
+"""Tests for the window's buttons, spec/window.md (WN-3 to WN-9, WN-11),
+and the Accept button (spec/accept.md).
 
 Some tests click the buttons on fake documents made for the tests. Others
 use a stand-in for run() (src/document_manager/commands.py), to see what
@@ -13,14 +14,15 @@ import sys
 
 import docx
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QPushButton
+from PySide6.QtWidgets import QMessageBox, QPushButton
 
 from document_manager.__main__ import main
+from document_manager.check import check_folder
 from document_manager.commands import COMMANDS
-from document_manager.window import RED, TAGS, WORKING, Window
+from document_manager.window import ACCEPT_QUESTION, BUTTONS, RED, TAGS, WORKING, Window
 
 FOLDER, REGISTER = r"D:\fake\docs", r"D:\fake\register.db"
-FINISHED = re.compile(r"(Register|Check|Summarize|Summaries) finished on .+ at \d\d:\d\d"
+FINISHED = re.compile(r"(Register|Check|Summarize|Summaries|Accept) finished on .+ at \d\d:\d\d"
                       r" \(this computer's time\)\.")
 
 
@@ -143,7 +145,7 @@ def test_wn6_working_while_a_command_runs(qtbot, monkeypatch):
     stand_in_run(monkeypatch, while_running=lambda: seen.append(
         (window.status.text(), [button.isEnabled() for button in buttons])))
     press(qtbot, window, "check")
-    assert seen == [(WORKING, [False] * 6)]
+    assert seen == [(WORKING, [False] * 7)]
     assert all(button.isEnabled() for button in buttons)
     assert FINISHED.fullmatch(window.status.text())
     assert window.status.text().startswith(f"Check finished on {FOLDER} at ")
@@ -192,7 +194,7 @@ def test_wn9_the_documents_are_never_changed(qtbot, tmp_path):
     reg = tmp_path / "register.db"
     before = every_file(docs)
     window = make_window(qtbot, docs, reg)
-    for command in COMMANDS:
+    for command in BUTTONS:
         press(qtbot, window, command)
         assert FINISHED.fullmatch(window.status.text()), window.status.text()
     assert every_file(docs) == before
@@ -208,7 +210,98 @@ def test_wn11_nothing_leaves_this_computer(qtbot, tmp_path, monkeypatch):
     monkeypatch.setattr(socket, "socket", no_network)
     monkeypatch.setattr(socket, "create_connection", no_network)
     window = make_window(qtbot, docs, tmp_path / "register.db")
-    for command in COMMANDS:
+    for command in BUTTONS:
         press(qtbot, window, command)
         assert FINISHED.fullmatch(window.status.text()), window.status.text()
     assert "PySide6.QtNetwork" not in sys.modules  # Qt's own network part is never loaded
+
+
+def answer_accept(monkeypatch, answer):
+    """Click this answer in Accept's question box. Notes what the box asked."""
+    asked = []
+
+    def stand_in(*args):
+        asked.append(args)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+
+    monkeypatch.setattr(QMessageBox, "question", stand_in)
+    return asked
+
+
+def registered_and_changed(qtbot, tmp_path):
+    docs = fake_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    window = make_window(qtbot, docs, reg)
+    press(qtbot, window, "register")
+    (docs / "notes.txt").write_bytes(b"changed\n")
+    return docs, reg, window
+
+
+def test_accept_yes_saves_and_says_so(qtbot, tmp_path, monkeypatch):
+    docs, reg, window = registered_and_changed(qtbot, tmp_path)
+    asked = answer_accept(monkeypatch, QMessageBox.StandardButton.Yes)
+    press(qtbot, window, "accept")
+    assert window.results.toPlainText() == (
+        "Changed: 1, new: 0, missing: 0, unchanged: 2.\n"
+        "  changed  notes.txt\n"
+        f"Accepted {docs}. Files listed: 3."
+    )
+    assert FINISHED.fullmatch(window.status.text())
+    assert check_folder(docs, reg).changed == []
+    [(_, _, question, _, picked)] = asked
+    assert question == ACCEPT_QUESTION
+    assert picked == QMessageBox.StandardButton.No  # No unless Yes is clicked
+
+
+def test_accept_no_saves_nothing(qtbot, tmp_path, monkeypatch):
+    docs, reg, window = registered_and_changed(qtbot, tmp_path)
+    before = reg.read_bytes()
+    answer_accept(monkeypatch, QMessageBox.StandardButton.No)
+    press(qtbot, window, "accept")
+    assert window.results.toPlainText().endswith("  changed  notes.txt\nNothing was saved.")
+    assert reg.read_bytes() == before
+
+
+def test_accept_shows_the_changes_while_it_asks(qtbot, tmp_path, monkeypatch):
+    docs, reg, window = registered_and_changed(qtbot, tmp_path)
+    seen = []
+    monkeypatch.setattr(QMessageBox, "question", lambda *args: seen.append(
+        window.results.toPlainText()) or QMessageBox.StandardButton.No)
+    press(qtbot, window, "accept")
+    assert seen == ["Changed: 1, new: 0, missing: 0, unchanged: 2.\n  changed  notes.txt"]
+
+
+def test_accept_nothing_changed_doesnt_ask(qtbot, tmp_path, monkeypatch):
+    docs = fake_docs(tmp_path)
+    window = make_window(qtbot, docs, tmp_path / "register.db")
+    press(qtbot, window, "register")
+    answer_accept(monkeypatch, AssertionError("asked when nothing had changed"))
+    press(qtbot, window, "accept")
+    assert window.results.toPlainText() == "Nothing has changed. Files checked: 3."
+    assert FINISHED.fullmatch(window.status.text())
+
+
+def test_accept_a_problem_shows_in_red(qtbot, tmp_path, monkeypatch):
+    docs = fake_docs(tmp_path)
+    answer_accept(monkeypatch, AssertionError("asked when there was a problem"))
+    window = make_window(qtbot, docs, tmp_path / "register.db")  # not made yet
+    press(qtbot, window, "accept")
+    assert window.status.text().startswith("Problem: ")
+    assert RED in window.status.styleSheet()
+    assert window.results.toPlainText() == ""
+    assert not (tmp_path / "register.db").exists()
+
+
+def test_accept_folder_changed_while_asking_saves_nothing(qtbot, tmp_path, monkeypatch):
+    docs, reg, window = registered_and_changed(qtbot, tmp_path)
+    before = reg.read_bytes()
+    monkeypatch.setattr(QMessageBox, "question", lambda *args: (
+        (docs / "report.docx").write_bytes(b"changed while asking")
+        and QMessageBox.StandardButton.Yes))
+    press(qtbot, window, "accept")
+    assert window.status.text().startswith("Problem: ")
+    assert "AC-1" in window.status.text()
+    assert window.results.toPlainText() == ""
+    assert reg.read_bytes() == before

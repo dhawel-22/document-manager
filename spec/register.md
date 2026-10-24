@@ -1,8 +1,10 @@
 # Register
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "03 · Lighter routine"
+**Changes:** v1.1 (2026-10-23): RG-5, a refused folder leaves the register
+file exactly as it was (thread 08). Made through a pull request.
 
 The register is the program's list of files. For each folder registered, it
 keeps every file's place, size and fingerprint (spec/fingerprint.md). Later,
@@ -14,5 +16,5 @@ the check will compare the folder with this list.
 | RG-2 | The list is saved in a register file (an SQLite database), with the folder's full path and the date and time (UTC) it was registered. |
 | RG-3 | Registering only reads the files. It never changes, moves or deletes them. |
 | RG-4 | The register file can't be inside the folder it lists. |
-| RG-5 | A folder that is already in the register file is refused. Its list is never silently replaced. |
+| RG-5 | A folder that is already in the register file is refused, and the register file is left exactly as it was. Its list is never silently replaced. |
 | RG-6 | If the folder or any file in it can't be read, nothing is saved, and the program says which one. |

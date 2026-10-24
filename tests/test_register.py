@@ -78,6 +78,19 @@ def test_rg5_same_folder_twice_is_refused(tmp_path):
     assert query(reg, "SELECT * FROM file") == first
 
 
+def test_rg5_refused_folder_leaves_the_register_file_as_it_was(tmp_path):
+    docs = make_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    register_folder(docs, reg)
+    con = sqlite3.connect(reg)  # an older register file, made before accepted lists
+    con.executescript("DROP TABLE accepted_file; DROP TABLE accepted; PRAGMA user_version = 2;")
+    con.close()
+    before = reg.read_bytes()
+    with pytest.raises(ValueError, match="RG-5"):
+        register_folder(docs, reg)
+    assert reg.read_bytes() == before
+
+
 def test_rg6_unreadable_file_saves_nothing(tmp_path, monkeypatch):
     docs = make_docs(tmp_path)
     reg = tmp_path / "register.db"

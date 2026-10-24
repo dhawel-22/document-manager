@@ -8,8 +8,10 @@ build-backend = "setuptools.build_meta"
 name = "document-manager"
 version = "0.1.0"
 requires-python = ">=3.12"
-# Reads Word documents (spec/summaries.md)
-dependencies = ["python-docx==1.2.0"]
+dependencies = [
+    "python-docx==1.2.0",  # reads Word documents (spec/summaries.md)
+    "PySide6_Essentials==6.11.2",  # draws the window (spec/window.md, D-022)
+]
 
 [tool.setuptools.package-data]
 document_manager = ["*.sql"]

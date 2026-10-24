@@ -1,8 +1,9 @@
 # Document Manager: Phase 1 scorecard
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "07 · The project's own documents"
+**Changes:** v1.1 (2026-10-23): result recorded; the bypass rule (thread 08).
 
 Phase 1 (opening document, section 5): the window, kept thin, with all
 the work in the engine; then the project's own documents. Each phase must
@@ -62,8 +63,12 @@ The thread log entry for thread 07 records what happened.
   documents.
 - The register file picker's button says "Save". "Starts" in a summary
   includes headings (SM-3), for Ernie to decide.
+- Ernie must tick "bypass rules" to merge (rule set only-ernie-merges).
+  Whether that tick could skip the tests, if ticked early, wasn't tested.
+  The rule: wait for the green tick, then tick "bypass rules", then merge.
 
 ## 5. Result
-Steps 1 to 5 and 8 are done. Steps 6 and 7 each have one check left,
-shown when this file's pull request is merged (section 3). Phase 1 passes
-when both show as expected. Phase 2 starts only when Ernie says so.
+Phase 1 passes (2026-10-23). Steps 1 to 8 are done. Both checks in
+section 3 showed as expected: on #58, merging stayed locked until "Run
+the tests" passed, and after #57 was merged, Check on docs showed only
+the new file (thread 07). Phase 2 starts only when Ernie says so.

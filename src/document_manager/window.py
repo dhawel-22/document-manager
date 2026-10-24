@@ -1,40 +1,72 @@
 """The window: the four commands as buttons (spec/window.md).
 
-Kept thin: the window only fills in the folder and the register file; the
-work is done by the same code as the commands. So far it has the two
-boxes; the buttons come next.
+Kept thin: the window fills in the folder and the register file, runs the
+command with run(), and shows the words run() gives back: the same code
+and the same words as the commands (src/document_manager/commands.py).
 """
 
 import sys
+from datetime import datetime
 
-from PySide6.QtCore import QDir
+from PySide6.QtCore import QDir, Qt
+from PySide6.QtGui import QColor, QFontDatabase, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
+    QPlainTextEdit,
     QPushButton,
     QWidget,
 )
 
+from document_manager.commands import COMMANDS, run
+
 OPEN = "The window is open. Close it to finish."  # WN-1
+WORKING = "Working…"  # WN-6
+RED = "#d13438"  # problems (WN-7)
+# The colour of each tag, found by how its lines start in the commands'
+# words (WN-4). Couldn't read has two: a line in summarize's words, and the
+# heading in summaries' words.
+TAGS = {
+    "  changed  ": "#c87000",
+    "  new      ": "#2a7fd4",
+    "  missing  ": RED,
+    "  couldn't read  ": "#9a4fd0",
+    "Couldn't read:": "#9a4fd0",
+}
 
 
 class Window(QWidget):
-    """The folder box and the register file box, each with "Choose…" (WN-2).
-    Both start empty, and nothing is kept between runs (WN-10)."""
+    """The two boxes, the four buttons, the results and the status line
+    (WN-2 to WN-8). The boxes start empty, and nothing is kept between runs
+    (WN-10)."""
 
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Document Manager")
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(700)
         self.folder = QLineEdit()
         self.register_file = QLineEdit()
         self.choose_folder_button = QPushButton("Choose…")
         self.choose_folder_button.clicked.connect(self.choose_folder)
         self.choose_register_file_button = QPushButton("Choose…")
         self.choose_register_file_button.clicked.connect(self.choose_register_file)
+        buttons = QHBoxLayout()
+        self.command_buttons = {}
+        for command in COMMANDS:
+            button = QPushButton(command.capitalize())
+            button.clicked.connect(lambda _checked=False, command=command: self.press(command))
+            buttons.addWidget(button)
+            self.command_buttons[command] = button
+        buttons.addStretch()
+        self.results = QPlainTextEdit()
+        self.results.setReadOnly(True)
+        self.results.setFont(QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont))
+        self.status = QLabel()
+        self.status.setTextFormat(Qt.TextFormat.PlainText)  # names show exactly as they are
 
         grid = QGridLayout(self)
         grid.addWidget(QLabel("Folder"), 0, 0)
@@ -43,6 +75,9 @@ class Window(QWidget):
         grid.addWidget(QLabel("Register file"), 1, 0)
         grid.addWidget(self.register_file, 1, 1)
         grid.addWidget(self.choose_register_file_button, 1, 2)
+        grid.addLayout(buttons, 2, 0, 1, 3)
+        grid.addWidget(self.results, 3, 0, 1, 3)
+        grid.addWidget(self.status, 4, 0, 1, 3)
 
     def choose_folder(self) -> None:
         """Fill the folder box from Windows' folder picker. Cancel changes nothing."""
@@ -60,6 +95,63 @@ class Window(QWidget):
         )
         if chosen:
             self.register_file.setText(QDir.toNativeSeparators(chosen))
+
+    def press(self, command: str) -> None:
+        """Run one command on the folder and register file in the boxes (WN-3)."""
+        self.results.clear()  # WN-5
+        folder, register_file = box_text(self.folder), box_text(self.register_file)
+        empty = [name for name, text in (("folder box", folder),
+                                         ("register file box", register_file)) if not text]
+        if empty:  # WN-8
+            self.show_status(f"Fill in the {' and the '.join(empty)} first.")
+            return
+        self.show_status(WORKING)  # WN-6
+        self.lock(True)
+        QApplication.processEvents()  # shows "Working…" before the work starts
+        try:
+            code, words = run(command, folder, register_file)
+        except Exception as error:  # an error the commands don't expect: shown, never hidden
+            code, words = 1, f"Problem: {type(error).__name__}: {error}"
+        finally:
+            self.lock(False)
+        if code:  # WN-7
+            self.show_status(words, problem=True)
+            return
+        self.show_results(words)  # WN-4
+        finished = datetime.now().strftime("%H:%M")
+        self.show_status(f"{command.capitalize()} finished on {folder} at {finished}"
+                         " (this computer's time).")
+
+    def lock(self, locked: bool) -> None:
+        """While a command runs, no button can be pressed (WN-6)."""
+        for button in self.findChildren(QPushButton):
+            button.setEnabled(not locked)
+
+    def show_status(self, text: str, problem: bool = False) -> None:
+        """The status line; a problem shows in red (WN-7)."""
+        self.status.setText(text)
+        self.status.setStyleSheet(f"color: {RED}" if problem else "")
+
+    def show_results(self, words: str) -> None:
+        """The command's words, line by line, each tag in its colour (WN-4)."""
+        cursor = QTextCursor(self.results.document())
+        for number, line in enumerate(words.split("\n")):
+            if number:
+                cursor.insertBlock()
+            look = QTextCharFormat()
+            for start, colour in TAGS.items():
+                if line.startswith(start):
+                    look.setForeground(QColor(colour))
+            cursor.insertText(line, look)
+
+
+def box_text(box: QLineEdit) -> str:
+    """A box's path, read the way PowerShell reads a typed one: without the
+    spaces around it, or the quotes Windows' "Copy as path" puts around it."""
+    text = box.text().strip()
+    if len(text) >= 2 and text[0] == text[-1] == '"':
+        text = text[1:-1]
+    return text
 
 
 def open_window() -> int:

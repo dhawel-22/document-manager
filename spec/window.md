@@ -1,10 +1,12 @@
 # Window
 
-**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "06 · The first window"
 **Changes:** v1.1 (2026-10-23): the window command says one line when the
 window opens. Made through a pull request.
+v1.2 (2026-10-23): how a box's path is read, and errors the commands
+don't expect. Made through a pull request.
 
 The window lets Ernie run the four commands (spec/report.md,
 spec/summaries.md) by clicking instead of typing. It's kept thin: the work
@@ -50,6 +52,11 @@ Details:
 - WN-1 (v1.1): when the window opens, the command says so in one line:
   "The window is open. Close it to finish." PowerShell waits until the
   window is closed.
+- WN-3 (v1.2): a box's path is read the way PowerShell reads a typed one:
+  the spaces around it are left out, and so are the quotes that Windows'
+  "Copy as path" puts around it.
+- WN-7 (v1.2): an error the commands don't expect is shown the same way,
+  starting "Problem:" with the error's name. It's never hidden.
 - "Choose…" for the register file can pick an existing one or name a new
   one. It never asks to replace a file, because nothing is replaced: a new
   register file is made only by Register (RG-2).

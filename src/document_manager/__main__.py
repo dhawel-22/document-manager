@@ -7,16 +7,10 @@
     python -m document_manager window
 """
 
-import sqlite3
 import sys
 
-from document_manager.check import check_folder
-from document_manager.register import register_folder
-from document_manager.report import report
-from document_manager.summaries import saved_summaries, summarize_folder
-from document_manager.summary_report import summaries_report, summarize_report
+from document_manager.commands import COMMANDS, run
 
-COMMANDS = ("register", "check", "summarize", "summaries")
 USAGE = ("Use: python -m document_manager register|check|summarize|summaries"
          " <folder> <register file>, or: python -m document_manager window")
 
@@ -32,23 +26,12 @@ def main(args: list[str]) -> int:
         print(USAGE)
         return 2
     command, folder, register_file = args
-    try:
-        if command == "register":
-            count = register_folder(folder, register_file)
-            print(f"Registered {folder}. Files listed: {count}.")  # RP-1
-        elif command == "check":
-            print(report(check_folder(folder, register_file)))  # RP-2, RP-3
-        elif command == "summarize":
-            print(summarize_report(summarize_folder(folder, register_file)))
-        else:
-            print(summaries_report(folder, saved_summaries(folder, register_file)))  # SM-8
-    except (OSError, ValueError, sqlite3.Error) as error:
-        print(f"Problem: {error}")  # RP-4
-        return 1
-    return 0
+    code, words = run(command, folder, register_file)
+    print(words)
+    return code
 
 
 if __name__ == "__main__":
-    # Characters the window can't show print as "?" instead of stopping the program.
+    # Characters PowerShell can't show print as "?" instead of stopping the program.
     sys.stdout.reconfigure(errors="replace")
     sys.exit(main(sys.argv[1:]))

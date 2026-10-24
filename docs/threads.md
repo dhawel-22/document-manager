@@ -411,3 +411,24 @@ Next: 09 · Phase 2: a Google Drive test folder. First, Ernie picks a
 small test folder in G:\My Drive; then Register, Check, Summarize and
 Accept on it in the window, read-only, with every file's fingerprint
 checked before and after.
+
+## 09 · Phase 2: a Google Drive test folder (2026-10-23)
+Purpose: Register, Check, Summarize and Accept on a small Google Drive
+folder, read-only.
+Decided: the test folder is G:\My Drive\Document manager test (Ernie).
+Done:
+- A try-out by Ernie in the window on the test folder (6 PDF files):
+  Accept then said "Nothing has changed. Files checked: 6." Every
+  file's fingerprint, size and last-changed time was the same before
+  and after, and the folder still holds only its 6 files.
+- The folder was registered in D:\python\document-manager-register.db,
+  next to docs and spec, which were left as they were.
+Lessons:
+- At the start, thinking was "medium" again.
+- The folder holds only PDFs, so Summarize had no Word documents to
+  read. What it said wasn't seen.
+Open: a Word document and a Google Doc in the test folder (how Google
+Docs show up, from thread 08); one network folder, read-only (Phase 2);
+the open items of thread 08.
+Next: 10 · Phase 2, continued. First, a Word document and a Google Doc
+in the test folder; then Check, Summarize and Accept on it.

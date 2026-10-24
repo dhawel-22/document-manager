@@ -1,6 +1,6 @@
 # The program itself (pyproject.toml) and the libraries it needs to read
-# Word documents, and the test tool and what it needs, at exact versions
-# (D-019).
+# Word documents and draw the window, and the test tools and what they
+# need, at exact versions (D-019).
 # Set up once, in the project folder:
 #   py -3.12 -m venv .venv
 #   .venv\Scripts\python -m pip install -r requirements-dev.txt
@@ -10,7 +10,10 @@
 python-docx==1.2.0
 lxml==6.1.3
 typing_extensions==4.16.0
+PySide6_Essentials==6.11.2
+shiboken6==6.11.2
 pytest==9.1.1
+pytest-qt==4.5.0
 colorama==0.4.6
 iniconfig==2.3.0
 packaging==26.3

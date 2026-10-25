@@ -1,10 +1,12 @@
 # Overview
 
-**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "13 · Discovery: where is my stuff"
 **Changes:** v1.1 (2026-10-25): details for program folders and other's
 endings. Made through a pull request.
+v1.2 (2026-10-25): the overview's words, with two lines of the example
+lined up. Made through a pull request.
 
 The overview answers where Ernie's files are, from what the register file
 already knows (docs/05-discovery-plan.md, questions 2 to 4): what kind of
@@ -49,8 +51,8 @@ Example overview, on fake folders:
     Kinds:
       Documents                   4 files    2.6 MB
       Pictures, sound and video   4 files    1.7 MB
-      Program files               0 files    0 bytes
-      Backups and archives        0 files    0 bytes
+      Program files               0 files   0 bytes
+      Backups and archives        0 files   0 bytes
       Other                       1 file    12.0 KB   endings: (none) 1
 
     Duplicates: 1 group, 1 extra copy, 400.0 KB.
@@ -71,6 +73,8 @@ How it's proven:
 - A try-out by Ernie on the real register file, in the window: the
   register file's fingerprint must be the same before and after, and the
   counts must match counts worked out separately.
+- The example above is exactly what the command shows for those fake
+  folders. A test checks it, line by line (v1.2).
 
 On trust (technical):
 - The kinds table below. Endings are compared ignoring capitals.
@@ -113,6 +117,10 @@ Details:
   changed.
 - A network folder shows under its network address, as the register
   saves it (thread 10).
+- Words (v1.2): numbers of 1,000 or more have commas, like 5,727. In the
+  kinds, the numbers of files and the sizes are lined up on the right.
+  Other's endings show with their dot, like `.zz 3`. With no duplicates,
+  or no accepted changes, the overview says "none".
 
 Left for later:
 - How often folders change: the register knows only accepted changes.

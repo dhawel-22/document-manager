@@ -1,22 +1,24 @@
 """Run the program (spec/report.md, spec/summaries.md, spec/window.md,
-spec/accept.md):
+spec/accept.md, spec/overview.md):
 
     python -m document_manager register <folder> <register file>
     python -m document_manager check <folder> <register file>
     python -m document_manager summarize <folder> <register file>
     python -m document_manager summaries <folder> <register file>
     python -m document_manager accept <folder> <register file>
+    python -m document_manager overview <register file>
     python -m document_manager window
 """
 
 import sys
 
 from document_manager.commands import (
-    ACCEPT_QUESTION, COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run,
+    ACCEPT_QUESTION, COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run, run_overview,
 )
 
 USAGE = ("Use: python -m document_manager register|check|summarize|summaries|accept"
-         " <folder> <register file>, or: python -m document_manager window")
+         " <folder> <register file>, or: python -m document_manager overview <register file>,"
+         " or: python -m document_manager window")
 
 
 def main(args: list[str]) -> int:
@@ -26,6 +28,10 @@ def main(args: list[str]) -> int:
         from document_manager.window import open_window
 
         return open_window()  # WN-1
+    if len(args) == 2 and args[0] == "overview":
+        code, words = run_overview(args[1])  # OV-12
+        print(words)
+        return code
     if len(args) != 3 or args[0] not in (*COMMANDS, "accept"):
         print(USAGE)
         return 2

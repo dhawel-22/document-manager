@@ -1,5 +1,5 @@
 """The commands' words, made in one place (spec/report.md, spec/summaries.md,
-spec/accept.md).
+spec/accept.md, spec/overview.md).
 
 The commands print these words and the window shows them, so both always
 say exactly the same (spec/window.md, WN-3, WN-4).
@@ -9,6 +9,8 @@ import sqlite3
 
 from document_manager.accept import accept_folder
 from document_manager.check import CheckResult, check_folder
+from document_manager.overview import overview
+from document_manager.overview_report import overview_report
 from document_manager.register import Counter, register_folder
 from document_manager.report import report
 from document_manager.summaries import saved_summaries, summarize_folder
@@ -37,6 +39,16 @@ def run(command: str, folder: str, register_file: str,
         if command == "summaries":
             return 0, summaries_report(folder, saved_summaries(folder, register_file))  # SM-8
         raise ValueError(f"Unknown command: {command}")
+    except PROBLEMS as error:
+        return 1, f"Problem: {error}"  # RP-4
+
+
+def run_overview(register_file: str) -> tuple[int, str]:
+    """The overview of every folder in the register file (OV-12), or one
+    plain line when there is a problem (OV-11). It reads only the register
+    file, so it has nothing to count."""
+    try:
+        return 0, overview_report(register_file, overview(register_file))
     except PROBLEMS as error:
         return 1, f"Problem: {error}"  # RP-4
 

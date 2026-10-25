@@ -523,6 +523,10 @@ Done:
   was the same before and after, nothing new appeared, and the
   register's new list matched fingerprints worked out separately. The
   register file gained only that folder's list.
+- Ernie also clicked Summarize on the same folder: 48 Word documents
+  summarized, 5 couldn't be read (4 old .doc files, and a Word lock file
+  that was there before the try-out). Every file was still the same
+  afterwards, and only summaries were added to the register file.
 Lessons:
 - At the start, thinking was "medium" again; Ernie switched it to "max".
 - The commit and pull request text for #70 weren't shown with the

@@ -1,8 +1,10 @@
 # Busy folders
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "14 · Discovery: runs that don't fail"
+**Changes:** v1.1 (2026-10-25): BF-11, a long run's progress file
+(spec/long-runs.md). Made through a pull request.
 
 On a busy drive, files are deleted, renamed, locked and changed all day.
 Until now, a file deleted, renamed or locked while a run ran stopped the
@@ -24,7 +26,7 @@ and the register file keeps the files that couldn't be read.
 | BF-8 | When any file couldn't be read, the words never say "Nothing has changed". The count line says how many couldn't be read, and each one follows, with the reason. |
 | BF-9 | Files that couldn't be read aren't changes. If they're all that Check found, Accept doesn't ask, and says "Nothing was saved." |
 | BF-10 | The overview counts the files that couldn't be read, and never counts them as duplicates (spec/overview.md v1.3). |
-| BF-11 | Runs still only read the files. The register file is the only file written, and the lists and summaries already in it stay as they are. |
+| BF-11 | Runs still only read the files. The register file is the only file written, apart from a long run's progress file (spec/long-runs.md), and the lists and summaries already in the register file stay as they are. |
 
 Example report, on fake files:
 

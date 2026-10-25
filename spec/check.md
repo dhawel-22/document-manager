@@ -1,11 +1,13 @@
 # Check
 
-**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "03 · Lighter routine"
 **Changes:** v1.1 (2026-10-23): CK-1 uses the newest list (thread 08).
 v1.2 (2026-10-25): CK-8, files that can't be read (spec/busy-folders.md).
 Made through a pull request.
+v1.3 (2026-10-25): CK-6, the progress file (spec/long-runs.md). Made
+through a pull request.
 
 The check compares a registered folder with its list in the register file
 (spec/register.md), to find what has changed since it was registered.
@@ -17,6 +19,6 @@ The check compares a registered folder with its list in the register file
 | CK-3 | A file on the list that is no longer in the folder is missing. |
 | CK-4 | A file in the folder that isn't on the list is new. |
 | CK-5 | A moved or renamed file shows as missing at its old place and new at its new place. |
-| CK-6 | Checking only reads. It never changes the files or the register file. |
+| CK-6 | Checking only reads the files and the register file, and never changes them. The only file it writes is its progress file (spec/long-runs.md). |
 | CK-7 | A folder that isn't in the register file is refused. |
 | CK-8 | If the folder, a subfolder or the register file can't be read, the check stops and says which one. A file that can't be read is shown only as couldn't read, with the reason, and the check carries on (spec/busy-folders.md). It never guesses. |

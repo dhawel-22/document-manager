@@ -1,7 +1,9 @@
 """Tests for the accept rules in spec/accept.md (AC-1 to AC-9)."""
 
+import os
 import re
 import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -46,7 +48,7 @@ def test_ac1_folder_changed_since_shown_saves_nothing(tmp_path):
 def test_ac2_saves_a_new_list_with_the_time(tmp_path):
     docs, reg = registered_docs(tmp_path)
     (docs / "letters" / "note.txt").write_bytes(b"hallo\n")
-    assert accept_folder(docs, reg, check_folder(docs, reg)) == 3
+    assert accept_folder(docs, reg, check_folder(docs, reg)).count == 3
     [(accepted_at,)] = query(reg, "SELECT accepted_at FROM accepted")
     assert re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\+00:00", accepted_at)
     assert sorted(query(reg, "SELECT path, size FROM accepted_file")) == [
@@ -87,7 +89,7 @@ def test_ac5_takes_the_whole_folder(tmp_path):
         changed=["letters/note.txt"], new=["letters/new.txt"], missing=["report.docx"],
         unchanged=1,
     )
-    assert accept_folder(docs, reg, shown) == 3
+    assert accept_folder(docs, reg, shown).count == 3
     assert check_folder(docs, reg) == NOTHING
 
 
@@ -123,17 +125,20 @@ def test_ac8_unregistered_folder_is_refused(tmp_path):
         accept_folder(other, reg, shown)
 
 
-def test_ac9_unreadable_file_saves_nothing(tmp_path, monkeypatch):
+def test_ac9_unreadable_subfolder_saves_nothing(tmp_path, monkeypatch):
     docs, reg = registered_docs(tmp_path)
     (docs / "empty.txt").write_bytes(b"changed")
     shown = check_folder(docs, reg)
     before = reg.read_bytes()
+    scandir = os.scandir
 
-    def cannot_read(path):
-        raise PermissionError(f"can't read {path}")
+    def denied(path):  # Windows says no to listing letters
+        if Path(path).name == "letters":
+            raise PermissionError(13, "Access is denied", str(path))
+        return scandir(path)
 
-    monkeypatch.setattr("document_manager.register.fingerprint", cannot_read)
-    with pytest.raises(PermissionError, match="empty.txt"):
+    monkeypatch.setattr(os, "scandir", denied)
+    with pytest.raises(PermissionError, match="letters"):
         accept_folder(docs, reg, shown)
     assert reg.read_bytes() == before
 
@@ -141,10 +146,11 @@ def test_ac9_unreadable_file_saves_nothing(tmp_path, monkeypatch):
 def test_accepting_brings_an_older_register_file_up_to_date(tmp_path):
     docs, reg = registered_docs(tmp_path)
     con = sqlite3.connect(reg)
-    con.executescript("DROP TABLE accepted_file; DROP TABLE accepted; PRAGMA user_version = 2;")
+    con.executescript("DROP TABLE unread; DROP TABLE accepted_file; DROP TABLE accepted;"
+                      " PRAGMA user_version = 2;")
     con.close()
     assert check_folder(docs, reg) == NOTHING  # a version 2 file is read as it is
     (docs / "empty.txt").write_bytes(b"changed")
     accept_folder(docs, reg, check_folder(docs, reg))
-    assert query(reg, "PRAGMA user_version") == [(3,)]
+    assert query(reg, "PRAGMA user_version") == [(4,)]
     assert check_folder(docs, reg) == NOTHING

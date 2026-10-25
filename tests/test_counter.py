@@ -62,8 +62,8 @@ def as_version_1(register_file):
     con = sqlite3.connect(register_file)
     try:
         con.executescript(
-            "DROP TABLE accepted_file; DROP TABLE accepted; DROP TABLE summary;"
-            " PRAGMA user_version = 1;"
+            "DROP TABLE unread; DROP TABLE accepted_file; DROP TABLE accepted;"
+            " DROP TABLE summary; PRAGMA user_version = 1;"
         )
     finally:
         con.close()

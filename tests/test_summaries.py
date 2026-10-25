@@ -54,8 +54,8 @@ def as_version_1(register_file):
     con = sqlite3.connect(register_file)
     try:
         con.executescript(
-            "DROP TABLE accepted_file; DROP TABLE accepted; DROP TABLE summary;"
-            " PRAGMA user_version = 1;"
+            "DROP TABLE unread; DROP TABLE accepted_file; DROP TABLE accepted;"
+            " DROP TABLE summary; PRAGMA user_version = 1;"
         )
     finally:
         con.close()
@@ -168,16 +168,16 @@ def test_sm9_nothing_is_sent(tmp_path, monkeypatch):
     assert summarize_folder(docs, reg).summarized == ["letters/note.docx", "report.docx"]
 
 
-def test_new_register_files_are_version_3(tmp_path):
+def test_new_register_files_are_version_4(tmp_path):
     _, reg = registered_docs(tmp_path)
-    assert query(reg, "PRAGMA user_version") == [(3,)]
+    assert query(reg, "PRAGMA user_version") == [(4,)]
 
 
 def test_version_1_register_file_is_brought_up_to_date(tmp_path):
     docs, reg = registered_docs(tmp_path)
     as_version_1(reg)
     summarize_folder(docs, reg)
-    assert query(reg, "PRAGMA user_version") == [(3,)]
+    assert query(reg, "PRAGMA user_version") == [(4,)]
     assert len(query(reg, "SELECT * FROM summary")) == 3
     assert len(query(reg, "SELECT * FROM file")) == 4
 
@@ -209,7 +209,7 @@ def test_check_reads_a_version_1_register_file_as_it_is(tmp_path):
 def test_unknown_register_file_version_is_refused(tmp_path):
     docs, reg = registered_docs(tmp_path)
     con = sqlite3.connect(reg)
-    con.execute("PRAGMA user_version = 4")
+    con.execute("PRAGMA user_version = 5")
     con.close()
-    with pytest.raises(ValueError, match="Unknown register file version: 4"):
+    with pytest.raises(ValueError, match="Unknown register file version: 5"):
         summarize_folder(docs, reg)

@@ -4,14 +4,14 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-from document_manager.check import CheckResult, compare, listed_files
-from document_manager.register import Counter, list_files, prepare_register
+from document_manager.check import CheckResult, compare_files, listed_files
+from document_manager.register import Counter, Files, list_files, prepare_register
 
 
 def accept_folder(folder: Path | str, register_file: Path | str, shown: CheckResult,
-                  counter: Counter | None = None) -> int:
+                  counter: Counter | None = None) -> Files:
     """Save a new list of the folder, after the person said yes to the
-    changes they were shown (AC-1, AC-2). Returns the number of files listed.
+    changes they were shown (AC-1, AC-2, BF-6). Returns the files listed.
 
     If the folder is no longer what was shown, nothing is saved: only the
     changes the person saw can be accepted.
@@ -22,13 +22,13 @@ def accept_folder(folder: Path | str, register_file: Path | str, shown: CheckRes
     register_file = Path(register_file).resolve(strict=True)
     listed = listed_files(folder, register_file)  # AC-8
 
-    # Read every file before saving anything, so an unreadable file stops
-    # the whole run with nothing saved (AC-9).
+    # Read every file before saving anything, so a subfolder that can't be
+    # read stops the whole run with nothing saved (AC-9, BF-5).
     files = list_files(folder, counter)
-    found = compare(listed, {place: fingerprint for place, _size, fingerprint in files})
+    found = compare_files(listed, files)
     if found != shown:
         raise ValueError(f"{folder} has changed since it was shown. Nothing was saved (AC-1)")
-    if not (found.changed or found.new or found.missing):
+    if not (found.changed or found.new or found.missing):  # couldn't read isn't a change (BF-9)
         raise ValueError("Nothing has changed. Nothing was saved (AC-6)")
 
     con = sqlite3.connect(register_file)
@@ -46,8 +46,13 @@ def accept_folder(folder: Path | str, register_file: Path | str, shown: CheckRes
             con.executemany(
                 "INSERT INTO accepted_file (accepted_id, path, size, fingerprint)"
                 " VALUES (?, ?, ?, ?)",
-                [(accepted_id, *f) for f in files],
+                [(accepted_id, *f) for f in files.read],
+            )
+            con.executemany(
+                "INSERT INTO unread (folder_id, accepted_id, path, size, reason)"
+                " VALUES (?, ?, ?, ?, ?)",
+                [(folder_id, accepted_id, *f) for f in files.unread],
             )
     finally:
         con.close()
-    return len(files)
+    return files

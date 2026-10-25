@@ -1,7 +1,9 @@
 """Tests for the register rules in spec/register.md (RG-1 to RG-6)."""
 
+import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 
@@ -30,7 +32,7 @@ def query(register_file, sql):
 def test_rg1_lists_every_file(tmp_path):
     docs = make_docs(tmp_path)
     reg = tmp_path / "register.db"
-    assert register_folder(docs, reg) == 3
+    assert register_folder(docs, reg).count == 3
     assert query(reg, "SELECT path, size, fingerprint FROM file ORDER BY path") == [
         ("empty.txt", 0, fingerprint(docs / "empty.txt")),
         ("letters/note.txt", 6, fingerprint(docs / "letters" / "note.txt")),
@@ -91,15 +93,18 @@ def test_rg5_refused_folder_leaves_the_register_file_as_it_was(tmp_path):
     assert reg.read_bytes() == before
 
 
-def test_rg6_unreadable_file_saves_nothing(tmp_path, monkeypatch):
+def test_rg6_unreadable_subfolder_saves_nothing(tmp_path, monkeypatch):
     docs = make_docs(tmp_path)
     reg = tmp_path / "register.db"
+    scandir = os.scandir
 
-    def cannot_read(path):
-        raise PermissionError(f"can't read {path}")
+    def denied(path):  # Windows says no to listing letters
+        if Path(path).name == "letters":
+            raise PermissionError(13, "Access is denied", str(path))
+        return scandir(path)
 
-    monkeypatch.setattr("document_manager.register.fingerprint", cannot_read)
-    with pytest.raises(PermissionError, match="empty.txt"):
+    monkeypatch.setattr(os, "scandir", denied)
+    with pytest.raises(PermissionError, match="letters"):
         register_folder(docs, reg)
     assert not reg.exists()
 

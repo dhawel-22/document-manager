@@ -1,9 +1,11 @@
 # Accept
 
-**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "08 · Before Phase 2"
 **Changes:** v1.1 (2026-10-23): the accept command. Made through a pull request.
+v1.2 (2026-10-25): AC-6 and AC-9, files that can't be read
+(spec/busy-folders.md). Made through a pull request.
 
 Accepting tells the register that a registered folder's changes are
 wanted. After that, the check compares the folder with the new list.
@@ -15,10 +17,10 @@ wanted. After that, the check compares the folder with the new list.
 | AC-3 | Old lists are kept. They are never changed or deleted. |
 | AC-4 | The check always uses the newest list. |
 | AC-5 | Accepting takes the whole folder: every changed, new and missing file. |
-| AC-6 | If nothing has changed, nothing is saved, and the program says so. |
+| AC-6 | If nothing has changed, nothing is saved, and the program says so. Files that couldn't be read aren't changes (spec/busy-folders.md, BF-9). |
 | AC-7 | Accepting only reads the files. The register file is the only thing it writes. |
 | AC-8 | A folder that isn't in the register file is refused. |
-| AC-9 | If the folder or any file in it can't be read, nothing is saved, and the program says which one. |
+| AC-9 | If the folder or a subfolder can't be read, nothing is saved, and the program says which one. A file that can't be read is saved with the reason instead of a fingerprint (spec/busy-folders.md). |
 
 The command, from PowerShell in the project folder:
 

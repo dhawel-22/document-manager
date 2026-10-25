@@ -3,13 +3,17 @@
 Kept thin: the window fills in the folder and the register file, runs the
 command with run(), and shows the words run() gives back: the same code
 and the same words as the commands (src/document_manager/commands.py).
+The work runs in a second thread, so the window keeps answering (WN-12).
 """
 
 import sys
+import threading
+from collections.abc import Callable
 from datetime import datetime
+from time import monotonic
 
-from PySide6.QtCore import QDir, Qt
-from PySide6.QtGui import QColor, QFontDatabase, QTextCharFormat, QTextCursor
+from PySide6.QtCore import QDir, Qt, QThread, Signal
+from PySide6.QtGui import QCloseEvent, QColor, QFontDatabase, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -26,11 +30,13 @@ from PySide6.QtWidgets import (
 from document_manager.commands import (
     COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run,
 )
+from document_manager.register import Counter
 
 OPEN = "The window is open. Close it to finish."  # WN-1
 WORKING = "Working…"  # WN-6
 BUTTONS = (*COMMANDS, "accept")  # WN-3
 ACCEPT_QUESTION = "Accept the changes shown?"  # AC-1
+CLOSE_QUESTION = "Work is still running. Stop it and close the window?"  # WN-15
 RED = "#d13438"  # problems (WN-7)
 # The colour of each tag, found by how its lines start in the commands'
 # words (WN-4). Couldn't read has two: a line in summarize's words, and the
@@ -44,15 +50,59 @@ TAGS = {
 }
 
 
+class Stopped(Exception):
+    """Raised by the window's counter once Stop was pressed (WN-14). The
+    engine counts only before it saves, so nothing is saved."""
+
+
+class Work(QThread):
+    """One button's work, run in a second thread so the window keeps
+    answering (WN-12). Qt's signals bring the counts, and what the work gave
+    back, to the window."""
+
+    counted = Signal(int, object)  # files done, and the total (None while finding them)
+    ended = Signal(object)  # what the work gave back, or the error it raised
+    # The count goes to the window at most ten times a second, so showing it
+    # doesn't slow the work. The first and the last count always go.
+    EVERY = 0.1  # seconds
+
+    def __init__(self, job: Callable[[Counter], object]) -> None:
+        super().__init__()
+        self.job = job
+        self.stop_wanted = threading.Event()
+        self.sent = 0.0  # when the count last went to the window
+
+    def run(self) -> None:
+        try:
+            outcome = self.job(self.counter)
+        except Exception as error:  # Stopped, or an error the commands don't expect
+            outcome = error
+        self.ended.emit(outcome)
+
+    def counter(self, done: int, total: int | None) -> None:
+        """The engine's counter (WN-13). Once Stop was pressed, it stops the
+        work instead (WN-14)."""
+        if self.stop_wanted.is_set():
+            raise Stopped
+        now = monotonic()
+        if done in (0, total) or now - self.sent >= self.EVERY:
+            self.sent = now
+            self.counted.emit(done, total)
+
+
 class Window(QWidget):
-    """The two boxes, the five buttons, the results and the status line
-    (WN-2 to WN-8). The boxes start empty, and nothing is kept between runs
-    (WN-10)."""
+    """The two boxes, the five buttons, Stop, the results and the status line
+    (WN-2 to WN-8, WN-14). The boxes start empty, and nothing is kept between
+    runs (WN-10)."""
 
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Document Manager")
         self.setMinimumWidth(700)
+        self.work = None  # the work running now, if any (WN-12)
+        self.then = None  # what to do when it ends
+        self.counting = "files"  # what the status line counts (WN-13)
+        self.close_when_done = False  # Yes to closing while the work ran (WN-15)
         self.folder = QLineEdit()
         self.register_file = QLineEdit()
         self.choose_folder_button = QPushButton("Choose…")
@@ -67,6 +117,10 @@ class Window(QWidget):
             buttons.addWidget(button)
             self.command_buttons[command] = button
         buttons.addStretch()
+        self.stop_button = QPushButton("Stop")  # WN-14
+        self.stop_button.setEnabled(False)
+        self.stop_button.clicked.connect(self.stop)
+        buttons.addWidget(self.stop_button)
         self.results = QPlainTextEdit()
         self.results.setReadOnly(True)
         self.results.setFont(QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont))
@@ -102,7 +156,7 @@ class Window(QWidget):
             self.register_file.setText(QDir.toNativeSeparators(chosen))
 
     def press(self, command: str) -> None:
-        """Run one command on the folder and register file in the boxes (WN-3)."""
+        """Start one command on the folder and register file in the boxes (WN-3)."""
         self.results.clear()  # WN-5
         folder, register_file = box_text(self.folder), box_text(self.register_file)
         empty = [name for name, text in (("folder box", folder),
@@ -110,33 +164,63 @@ class Window(QWidget):
         if empty:  # WN-8
             self.show_status(f"Fill in the {' and the '.join(empty)} first.")
             return
+        self.counting = "Word documents" if command == "summarize" else "files"
+        if command == "accept":  # the changes first, then the question (AC-1)
+            self.begin(lambda counter: changes_to_accept(folder, register_file, counter),
+                       lambda outcome: self.ask(folder, register_file, outcome))
+        else:
+            self.begin(lambda counter: run(command, folder, register_file, counter),
+                       lambda outcome: self.finish(command, folder, outcome))
+
+    def begin(self, job: Callable[[Counter], object], then: Callable[[object], None]) -> None:
+        """Start the work in a second thread (WN-12). When it ends, then() is
+        given what it gave back."""
         self.show_status(WORKING)  # WN-6
         self.lock(True)
-        QApplication.processEvents()  # shows "Working…" before the work starts
-        try:
-            if command == "accept":
-                code, words = self.accept(folder, register_file)
-            else:
-                code, words = run(command, folder, register_file)
-        except Exception as error:  # an error the commands don't expect: shown, never hidden
-            code, words = 1, f"Problem: {type(error).__name__}: {error}"
-        finally:
-            self.lock(False)
+        self.then = then
+        self.work = Work(job)
+        self.work.counted.connect(self.show_count, Qt.ConnectionType.QueuedConnection)
+        self.work.ended.connect(self.ended, Qt.ConnectionType.QueuedConnection)
+        self.work.start()
+
+    def ended(self, outcome: object) -> None:
+        """The work has ended: unlock, then show how it ended, or close (WN-15)."""
+        self.work.wait()  # its thread is just finishing
+        self.work = None
+        self.lock(False)
+        if self.close_when_done:
+            self.close()
+            return
+        self.then(outcome)
+
+    def finish(self, command: str, folder: str, outcome: object) -> None:
+        """Show how the work ended: its words, a problem, or stopped."""
         self.results.clear()  # Accept showed the changes while it asked
+        finished = datetime.now().strftime("%H:%M")
+        if isinstance(outcome, Stopped):  # WN-14
+            self.show_status(f"{command.capitalize()} stopped at {finished}"
+                             " (this computer's time). Nothing was saved.")
+            return
+        if isinstance(outcome, Exception):  # an error the commands don't expect: shown, never hidden
+            outcome = 1, f"Problem: {type(outcome).__name__}: {outcome}"
+        code, words = outcome
         if code:  # WN-7
             self.show_status(words, problem=True)
             return
         self.show_results(words)  # WN-4
-        finished = datetime.now().strftime("%H:%M")
         self.show_status(f"{command.capitalize()} finished on {folder} at {finished}"
                          " (this computer's time).")
 
-    def accept(self, folder: str, register_file: str) -> tuple[int, str]:
+    def ask(self, folder: str, register_file: str, outcome: object) -> None:
         """Show the changes, then accept them only if Yes is clicked (AC-1).
-        Returns the same words as the accept command, without its question."""
-        code, words, found = changes_to_accept(folder, register_file)
+        Nothing runs while the question is open."""
+        if isinstance(outcome, Exception):  # stopped, or an error the commands don't expect
+            self.finish("accept", folder, outcome)
+            return
+        code, words, found = outcome
         if found is None:  # nothing to accept (AC-6), or a problem
-            return code, words
+            self.finish("accept", folder, (code, words))
+            return
         self.show_results(words)
         answer = QMessageBox.question(
             self, "Accept", ACCEPT_QUESTION,
@@ -144,14 +228,58 @@ class Window(QWidget):
             QMessageBox.StandardButton.No,
         )
         if answer != QMessageBox.StandardButton.Yes:
-            return 0, f"{words}\n{NOTHING_SAVED}"
-        code, saved = accept(folder, register_file, found)
-        return (code, saved) if code else (0, f"{words}\n{saved}")
+            self.finish("accept", folder, (0, f"{words}\n{NOTHING_SAVED}"))
+            return
+        self.begin(lambda counter: accept(folder, register_file, found, counter),
+                   lambda outcome: self.accepted(folder, words, outcome))
+
+    def accepted(self, folder: str, words: str, outcome: object) -> None:
+        """After Yes: the changes shown, then the accept command's last line."""
+        if not isinstance(outcome, Exception):
+            code, saved = outcome
+            outcome = (code, saved) if code else (0, f"{words}\n{saved}")
+        self.finish("accept", folder, outcome)
+
+    def stop(self) -> None:
+        """Stop the work after the file it's reading (WN-14)."""
+        if self.work is not None:
+            self.work.stop_wanted.set()
+            self.stop_button.setEnabled(False)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        """Closing while the work runs asks first (WN-15). Yes stops the work,
+        and the window closes once it has stopped."""
+        if self.work is not None:
+            answer = QMessageBox.question(
+                self, "Close", CLOSE_QUESTION,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                event.ignore()
+                return
+            if self.work is not None:  # it may have ended while the question was open
+                self.close_when_done = True
+                self.stop()
+                event.ignore()
+                return
+        event.accept()
 
     def lock(self, locked: bool) -> None:
-        """While a command runs, no button can be pressed (WN-6)."""
+        """While the work runs, the boxes can't be changed and no button can be
+        pressed except Stop (WN-6)."""
         for button in self.findChildren(QPushButton):
             button.setEnabled(not locked)
+        self.stop_button.setEnabled(locked)
+        self.folder.setReadOnly(locked)
+        self.register_file.setReadOnly(locked)
+
+    def show_count(self, done: int, total: int | None) -> None:
+        """How far the work has got (WN-13)."""
+        if total is None:
+            self.show_status(f"{WORKING} {done} files found so far.")
+        else:
+            self.show_status(f"{WORKING} {done} of {total} {self.counting} read.")
 
     def show_status(self, text: str, problem: bool = False) -> None:
         """The status line; a problem shows in red (WN-7)."""

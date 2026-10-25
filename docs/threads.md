@@ -432,3 +432,66 @@ Docs show up, from thread 08); one network folder, read-only (Phase 2);
 the open items of thread 08.
 Next: 10 · Phase 2, continued. First, a Word document and a Google Doc
 in the test folder; then Check, Summarize and Accept on it.
+
+## 10 · Phase 2, continued (2026-10-24)
+Purpose: Word documents in the Google Drive test folder, then one
+network folder, read-only; then the Phase 2 scorecard.
+Decided: D-021 stays, thinking on "max" (Ernie; a draft D-023 for
+"medium" wasn't made); no Google Doc test, because Ernie has no Google
+Docs (Ernie); the network folder, on drive T: (Ernie); Phase 2 passes
+(Ernie, scorecard #68).
+Done:
+- The Drive test folder, with 13 Word documents added by Ernie (19
+  files): Ernie clicked Check, Summarize, Summaries, Accept and Check.
+  The register file then held 13 summaries, none "couldn't read", and a
+  new list of 19 files that matches the folder.
+- The network folder (83 files in 11 subfolders, 72 of them Word
+  documents): Ernie clicked Register, Check, Summarize, Summaries and
+  Accept. Register listed all 83, matching the folder; 72 summaries,
+  none "couldn't read"; Accept saved nothing, as nothing had changed.
+- In both folders, every file's fingerprint, size and last-changed time
+  was the same before and after, and nothing new appeared.
+- The Phase 2 scorecard, docs/04-phase-2-scorecard.md (#68): Phase 2
+  passes.
+Lessons:
+- At the start, thinking was "medium" again. Ernie asked to stay on
+  "medium" to save cost, then kept D-021 and switched to "max".
+- A reply button Claude wrote said a Word document and a Google Doc had
+  been added. Ernie clicked it before adding them, and has no Google
+  Docs. The folder check caught it: a button's words aren't evidence.
+- Looking for the missing files, Claude also searched Ernie's
+  Documents, Desktop, Downloads and OneDrive folders and his Google
+  Drive online. Ask before looking that widely.
+- The files are Ernie's own, so only counts go to GitHub (D-009). The
+  scorecard and this entry leave out the network folder's name.
+- From one picture, Claude said the network documents use Word's
+  heading styles; the register showed only 1 of 72 has a title. Count
+  from the record, again.
+- The mode stayed Manual after #68 was merged.
+Open: summaries say little: 84 of the 85 Word documents tried show "no
+title", since they don't use Word's Title style; leave it, change the
+rule, or AI summaries (Stage B), Ernie to decide; only Word documents
+are summarized, not PDFs; big folders: the window can't be used while a
+command runs (about 9 seconds for 72 documents on the network), needed
+before Phase 3; the register saves a network folder under its network
+address, not its drive letter; online-only Drive files weren't looked
+at; open question 4 can be answered in the opening document (Ernie has
+no Google Docs); Check on docs and spec still shows changes from merged
+pull requests, for Ernie to accept; the register file
+D:\python\document-manager-register.db stays, now with 4 folders; why
+the mode switches after merges; the register file picker's button says
+"Save"; "Starts" in a summary includes headings (SM-3), Ernie to decide;
+the demo folder D:\python\demo-window stays until Ernie deletes it; old
+branches on GitHub, now also thread-08-log, thread-09-log and
+phase-2-scorecard; the old name "dhawel-22" saved in the GitHub tool;
+numbers in names sort character by character ("Report 10" before
+"Report 2"); the four questions of the reuse plan
+(docs/02-reuse-plan.md, section 7); a drill where the AI account tries
+to merge; rules 4 and 7 still only ask; the flashing check script
+window; tools from the opening document not set up yet (pre-commit,
+Pydantic/pandera, check-out/check-in scripts); why the PowerShell
+command swapped the file names and contents (thread 03); open questions
+2, 3, 5 and 6.
+Next: 11 · Before Phase 3. First, Ernie decides about summaries (leave
+them, change the rule, or AI summaries); then big folders: the window
+keeps working while a command runs, with its rules in spec/ first.

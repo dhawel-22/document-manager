@@ -1,5 +1,6 @@
 """Tests for the overview's words and its command, spec/overview.md v1.2
-(OV-2, OV-10 to OV-12, the example, and the details of the words).
+(OV-2, OV-10 to OV-12, the example, and the details of the words), and
+v1.3 (files that couldn't be read).
 
 The register files here are fakes made by the tests: some by registering
 fake folders, some written straight in, since the overview never opens the
@@ -16,7 +17,7 @@ from document_manager.__main__ import USAGE, main
 from document_manager.commands import run_overview
 from document_manager.overview import overview
 from document_manager.overview_report import NOTE, overview_report, size_words
-from document_manager.register import prepare_register, register_folder
+from document_manager.register import IN_USE, prepare_register, register_folder
 
 PROJECT = Path(__file__).resolve().parent.parent
 KB = 1024
@@ -31,7 +32,8 @@ def fp(number):
 def fake_register(path, folders):
     """A register file written straight in. Each folder is its path and its
     lists, oldest first: (date, {place: (size, fingerprint)}). The first
-    list is the one saved when it was registered; the others were accepted."""
+    list is the one saved when it was registered; the others were accepted.
+    A fingerprint of None is a file that couldn't be read (BF-6)."""
     con = sqlite3.connect(path)
     try:
         prepare_register(con)
@@ -40,17 +42,30 @@ def fake_register(path, folders):
                 (registered_at, first), *accepted = lists
                 con.execute("INSERT INTO folder (id, path, registered_at) VALUES (?, ?, ?)",
                             (folder_id, folder, registered_at))
-                con.executemany("INSERT INTO file VALUES (?, ?, ?, ?)",
-                                [(folder_id, place, *row) for place, row in first.items()])
+                fake_list(con, folder_id, None, first)
                 for accepted_at, files in accepted:
                     accepted_id = con.execute(
                         "INSERT INTO accepted (folder_id, accepted_at) VALUES (?, ?)",
                         (folder_id, accepted_at)).lastrowid
-                    con.executemany("INSERT INTO accepted_file VALUES (?, ?, ?, ?)",
-                                    [(accepted_id, place, *row) for place, row in files.items()])
+                    fake_list(con, folder_id, accepted_id, files)
     finally:
         con.close()
     return path
+
+
+def fake_list(con, folder_id, accepted_id, files):
+    """One of fake_register's lists: the first (accepted_id None), or an
+    accepted one."""
+    read = [(place, size, fp) for place, (size, fp) in files.items() if fp is not None]
+    if accepted_id is None:
+        con.executemany("INSERT INTO file VALUES (?, ?, ?, ?)",
+                        [(folder_id, *row) for row in read])
+    else:
+        con.executemany("INSERT INTO accepted_file VALUES (?, ?, ?, ?)",
+                        [(accepted_id, *row) for row in read])
+    con.executemany("INSERT INTO unread VALUES (?, ?, ?, ?, ?)",
+                    [(folder_id, accepted_id, place, size, IN_USE)
+                     for place, (size, fp) in files.items() if fp is None])
 
 
 def example_register(tmp_path):
@@ -150,6 +165,21 @@ def test_other_endings_show_with_their_dot(tmp_path):
         (r"C:\Odd", [("2026-10-24T15:20:00+00:00", files)])])
     words = overview_report(str(reg), overview(reg))
     assert "  Other                       3 files   6 bytes   endings: .zz 2, (none) 1\n" in words
+
+
+def test_couldnt_read_shows_only_when_there_are_some(tmp_path):
+    busy = {"a.txt": (5, fp(1)), "mail.pst": (9, None), "old.pst": (9, None)}
+    reg = fake_register(tmp_path / "register.db", [
+        (r"C:\Busy", [("2026-10-25T20:00:00+00:00", busy)]),
+        (r"C:\Quiet", [("2026-10-25T20:01:00+00:00", {"c.txt": (3, fp(3))})]),
+    ])
+    lines = overview_report(str(reg), overview(reg)).splitlines()
+    assert "Folders: 2, files: 4, size: 26 bytes, couldn't read: 2, empty files: 0." in lines
+    assert "  Files: 3, size: 23 bytes, couldn't read: 2. Newest list: 2026-10-25 20:00 UTC." \
+           " Changes accepted: 0." in lines
+    assert "  Files: 1, size: 3 bytes. Newest list: 2026-10-25 20:01 UTC." \
+           " Changes accepted: 0." in lines
+    assert "Duplicates: none." in lines  # with no fingerprints, the two .pst files aren't copies
 
 
 def test_ov11_a_problem_is_one_plain_line(tmp_path, capsys):

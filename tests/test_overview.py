@@ -1,4 +1,5 @@
-"""Tests for the overview's engine, spec/overview.md (OV-1 to OV-9, OV-11).
+"""Tests for the overview's engine, spec/overview.md (OV-1 to OV-9, OV-11),
+and files that couldn't be read (v1.3, spec/busy-folders.md, BF-10).
 
 Every folder here is fake, made by the test in a temporary folder. The
 overview's words and its command (OV-2's first lines, OV-10, OV-12) are
@@ -6,6 +7,7 @@ tested with the command.
 """
 
 import sqlite3
+from contextlib import contextmanager
 
 import pytest
 
@@ -15,7 +17,7 @@ from document_manager.overview import (
     BACKUPS, DOCUMENTS, ENDINGS, KIND_OF_ENDING, KINDS, MEDIA, OTHER, PROGRAMS,
     Change, Duplicate, kind_of, overview,
 )
-from document_manager.register import prepare_register, register_folder
+from document_manager.register import prepare_register, read_file, register_folder
 
 
 def make(folder, files):
@@ -55,6 +57,21 @@ def query(register_file, sql):
         return con.execute(sql).fetchall()
     finally:
         con.close()
+
+
+@contextmanager
+def couldnt_read(monkeypatch, *names):
+    """While this holds, Windows says no to reading the files with these
+    names, as for a file another program holds open (BF-1)."""
+
+    def stand_in(path):
+        if path.name in names:
+            raise PermissionError(13, "Permission denied", str(path))
+        return read_file(path)
+
+    with monkeypatch.context() as patch:
+        patch.setattr("document_manager.register.read_file", stand_in)
+        yield
 
 
 def snapshot(tmp_path):
@@ -197,6 +214,61 @@ def test_ov9_each_accepted_list_against_the_list_before(tmp_path):
     assert [f.accepted for f in result.folders] == [0, 2]  # archive has none
 
 
+def test_bf10_files_that_couldnt_be_read_are_counted_but_never_duplicates(
+        tmp_path, monkeypatch):
+    letters, archive, reg = registered(tmp_path)  # "sunny" is in three places
+    busy = make(tmp_path / "busy", {
+        "holiday.jpg": b"sunny",  # a fourth copy, but it can't be read
+        "mail.pst": b"fake mail",  # 9 bytes, and it can't be read either
+        "notes.txt": b"notes",  # 5 bytes
+    })
+    with couldnt_read(monkeypatch, "holiday.jpg", "mail.pst"):
+        register_folder(busy, reg)
+    result = overview(reg)
+    [folder] = [folder for folder in result.folders if folder.path == str(busy)]
+    assert (folder.files, folder.size, folder.unread) == (3, 19, 2)
+    assert list(folder.kinds.values()) == [1, 1, 0, 0, 1]  # each file has its kind
+    assert (result.files, result.unread) == (12, 2)
+    assert result.duplicates == [
+        Duplicate(5, [str(archive / "holiday.jpg"), str(archive / "old" / "holiday.JPG"),
+                      str(letters / "holiday.jpg")])]
+
+
+def test_bf10_a_size_windows_didnt_give_counts_as_none(tmp_path, monkeypatch):
+    _, _, reg = registered(tmp_path)
+    busy = make(tmp_path / "busy", {"mail.pst": b"fake mail", "notes.txt": b"notes"})
+    monkeypatch.setattr("document_manager.register.size_of", lambda path: None)
+    with couldnt_read(monkeypatch, "mail.pst"):
+        register_folder(busy, reg)
+    result = overview(reg)
+    [folder] = [folder for folder in result.folders if folder.path == str(busy)]
+    assert (folder.files, folder.size, folder.unread) == (2, 5, 1)
+    assert result.kinds[OTHER] == (2, 7)  # mail.pst, and readme's 7 bytes in letters
+
+
+def test_bf10_an_empty_file_that_couldnt_be_read_is_still_empty(tmp_path, monkeypatch):
+    _, _, reg = registered(tmp_path)  # notes.txt is empty
+    busy = make(tmp_path / "busy", {"lock.tmp": b""})
+    with couldnt_read(monkeypatch, "lock.tmp"):
+        register_folder(busy, reg)
+    result = overview(reg)
+    assert (result.empty_files, result.unread) == (2, 1)
+
+
+def test_bf10_changes_are_counted_the_way_check_counts_them(tmp_path, monkeypatch):
+    letters, _, reg = registered(tmp_path)
+    (letters / "letter.docx").write_bytes(b"a new letter")
+    with couldnt_read(monkeypatch, "report.pdf"):  # neither changed, new nor missing
+        accept_folder(letters, reg, check_folder(letters, reg))
+    (letters / "readme").unlink()
+    accept_folder(letters, reg, check_folder(letters, reg))  # report.pdf is new to the list
+    first, second = [at for (at,) in query(reg, "SELECT accepted_at FROM accepted ORDER BY id")]
+    assert overview(reg).changes == [
+        Change(str(letters), first, changed=1, new=0, missing=0),
+        Change(str(letters), second, changed=0, new=1, missing=1),
+    ]
+
+
 def test_ov11_a_missing_register_file(tmp_path):
     with pytest.raises(FileNotFoundError):
         overview(tmp_path / "not-there.db")
@@ -228,7 +300,8 @@ def test_ov11_a_register_file_with_no_folders(tmp_path):
 def test_older_register_files_are_read_as_they_are(tmp_path):
     _, _, reg = registered(tmp_path)
     expected = overview(reg)
-    for older in ("DROP TABLE accepted_file; DROP TABLE accepted; PRAGMA user_version = 2;",
+    for older in ("DROP TABLE unread; PRAGMA user_version = 3;",
+                  "DROP TABLE accepted_file; DROP TABLE accepted; PRAGMA user_version = 2;",
                   "DROP TABLE summary; PRAGMA user_version = 1;"):
         con = sqlite3.connect(reg)
         con.executescript(older)

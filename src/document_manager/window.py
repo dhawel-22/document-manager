@@ -1,8 +1,9 @@
 """The window: the commands as buttons (spec/window.md).
 
 Kept thin: the window fills in the folder and the register file, runs the
-command with run(), and shows the words run() gives back: the same code
-and the same words as the commands (src/document_manager/commands.py).
+command with run() or run_overview(), and shows the words they give back:
+the same code and the same words as the commands
+(src/document_manager/commands.py).
 The work runs in a second thread, so the window keeps answering (WN-12).
 """
 
@@ -28,13 +29,13 @@ from PySide6.QtWidgets import (
 )
 
 from document_manager.commands import (
-    COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run,
+    COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run, run_overview,
 )
 from document_manager.register import Counter
 
 OPEN = "The window is open. Close it to finish."  # WN-1
 WORKING = "Working…"  # WN-6
-BUTTONS = (*COMMANDS, "accept")  # WN-3
+BUTTONS = (*COMMANDS, "accept", "overview")  # WN-3
 ACCEPT_QUESTION = "Accept the changes shown?"  # AC-1
 CLOSE_QUESTION = "Work is still running. Stop it and close the window?"  # WN-15
 RED = "#d13438"  # problems (WN-7)
@@ -91,7 +92,7 @@ class Work(QThread):
 
 
 class Window(QWidget):
-    """The two boxes, the five buttons, Stop, the results and the status line
+    """The two boxes, the six buttons, Stop, the results and the status line
     (WN-2 to WN-8, WN-14). The boxes start empty, and nothing is kept between
     runs (WN-10)."""
 
@@ -159,13 +160,18 @@ class Window(QWidget):
         """Start one command on the folder and register file in the boxes (WN-3)."""
         self.results.clear()  # WN-5
         folder, register_file = box_text(self.folder), box_text(self.register_file)
-        empty = [name for name, text in (("folder box", folder),
-                                         ("register file box", register_file)) if not text]
+        boxes = [("folder box", folder), ("register file box", register_file)]
+        if command == "overview":  # it uses only the register file box (OV-13)
+            boxes = [("register file box", register_file)]
+        empty = [name for name, text in boxes if not text]
         if empty:  # WN-8
             self.show_status(f"Fill in the {' and the '.join(empty)} first.")
             return
         self.counting = "Word documents" if command == "summarize" else "files"
-        if command == "accept":  # the changes first, then the question (AC-1)
+        if command == "overview":  # it reads only the register file, so it counts nothing
+            self.begin(lambda counter: run_overview(register_file),
+                       lambda outcome: self.finish(command, register_file, outcome))
+        elif command == "accept":  # the changes first, then the question (AC-1)
             self.begin(lambda counter: changes_to_accept(folder, register_file, counter),
                        lambda outcome: self.ask(folder, register_file, outcome))
         else:
@@ -193,8 +199,9 @@ class Window(QWidget):
             return
         self.then(outcome)
 
-    def finish(self, command: str, folder: str, outcome: object) -> None:
-        """Show how the work ended: its words, a problem, or stopped."""
+    def finish(self, command: str, target: str, outcome: object) -> None:
+        """Show how the work ended: its words, a problem, or stopped. The
+        status line names the folder, or for Overview the register file."""
         self.results.clear()  # Accept showed the changes while it asked
         finished = datetime.now().strftime("%H:%M")
         if isinstance(outcome, Stopped):  # WN-14
@@ -208,7 +215,7 @@ class Window(QWidget):
             self.show_status(words, problem=True)
             return
         self.show_results(words)  # WN-4
-        self.show_status(f"{command.capitalize()} finished on {folder} at {finished}"
+        self.show_status(f"{command.capitalize()} finished on {target} at {finished}"
                          " (this computer's time).")
 
     def ask(self, folder: str, register_file: str, outcome: object) -> None:

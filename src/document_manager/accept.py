@@ -5,10 +5,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from document_manager.check import CheckResult, compare, listed_files
-from document_manager.register import list_files, prepare_register
+from document_manager.register import Counter, list_files, prepare_register
 
 
-def accept_folder(folder: Path | str, register_file: Path | str, shown: CheckResult) -> int:
+def accept_folder(folder: Path | str, register_file: Path | str, shown: CheckResult,
+                  counter: Counter | None = None) -> int:
     """Save a new list of the folder, after the person said yes to the
     changes they were shown (AC-1, AC-2). Returns the number of files listed.
 
@@ -23,7 +24,7 @@ def accept_folder(folder: Path | str, register_file: Path | str, shown: CheckRes
 
     # Read every file before saving anything, so an unreadable file stops
     # the whole run with nothing saved (AC-9).
-    files = list_files(folder)
+    files = list_files(folder, counter)
     found = compare(listed, {place: fingerprint for place, _size, fingerprint in files})
     if found != shown:
         raise ValueError(f"{folder} has changed since it was shown. Nothing was saved (AC-1)")

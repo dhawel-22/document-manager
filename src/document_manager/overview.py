@@ -1,5 +1,6 @@
 """Overview: where the files are, worked out from the register file alone
-(spec/overview.md, OV-1 to OV-9, OV-11).
+(spec/overview.md, OV-1 to OV-9, OV-11), files that couldn't be read
+included (spec/busy-folders.md, BF-10).
 
 Only the register file is read, and it is opened read-only (OV-1). The
 folders and their files are never opened.
@@ -10,7 +11,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path, PureWindowsPath
 
-from document_manager.check import compare
+from document_manager.check import CheckResult, compare
 from document_manager.register import VERSION
 
 # The five kinds, in the order the overview shows them (OV-4).
@@ -38,7 +39,9 @@ KIND_OF_ENDING = {ending: kind for kind, endings in ENDINGS.items() for ending i
 # its ending (OV-4).
 PROGRAM_FOLDERS = {".git", "node_modules", "__pycache__", ".venv", "venv", "site-packages"}
 
-Listing = list[tuple[str, int, str]]  # each file's place, size and fingerprint
+# Each file's place, size and fingerprint. A file that couldn't be read has
+# no fingerprint, and its size is None if Windows didn't give it (BF-6).
+Listing = list[tuple[str, int | None, str | None]]
 
 
 @dataclass
@@ -48,6 +51,7 @@ class FolderOverview:
     path: str  # the folder's full path, as the register file saves it
     files: int
     size: int  # in bytes
+    unread: int  # its files that couldn't be read (BF-10)
     listed_at: str  # when its newest list was saved: date and time, UTC
     accepted: int  # how many times its changes were accepted
     kinds: dict[str, int]  # its files of each kind, in the order of KINDS
@@ -97,6 +101,11 @@ class Overview:
         return sum(folder.size for folder in self.folders)
 
     @property
+    def unread(self) -> int:
+        """The files that couldn't be read, in all folders (BF-10)."""
+        return sum(folder.unread for folder in self.folders)
+
+    @property
     def extra_copies(self) -> int:
         """Every copy but one, in all the duplicates (OV-7)."""
         return sum(len(duplicate.places) - 1 for duplicate in self.duplicates)
@@ -129,17 +138,18 @@ def overview(register_file: Path | str) -> Overview:
             kind = kind_of(full)
             kinds[kind] += 1
             files_of[kind] += 1
-            size_of[kind] += size
+            size_of[kind] += size or 0  # a size Windows didn't give counts as none
             if kind == OTHER:
                 endings[ending(place.rsplit("/", 1)[-1])] += 1
             if size == 0:  # empty files all have the same fingerprint (OV-8)
                 empty += 1
-            else:
+            elif fp is not None:  # a file that couldn't be read is never a duplicate (BF-10)
                 copies.setdefault(fp, (size, []))[1].append(full)
-        folders.append(FolderOverview(path, len(newest), sum(row[1] for row in newest),
+        folders.append(FolderOverview(path, len(newest), sum(row[1] or 0 for row in newest),
+                                      sum(1 for row in newest if row[2] is None),
                                       listed_at, len(lists) - 1, kinds))
         for (_, before), (accepted_at, after) in zip(lists, lists[1:]):  # OV-9
-            found = compare(_fingerprints(before), _fingerprints(after))
+            found = _compared(before, after)
             changes.append(Change(path, accepted_at, len(found.changed), len(found.new),
                                   len(found.missing)))
     duplicates = [Duplicate(size, sorted(places, key=_order))
@@ -182,16 +192,26 @@ def _lists(con: sqlite3.Connection, register_file: Path) -> dict[str, list[tuple
     lists_of = {}
     for folder_id, path, registered_at in con.execute(
             "SELECT id, path, registered_at FROM folder").fetchall():
-        lists = [(registered_at, con.execute(
+        first = con.execute(
             "SELECT path, size, fingerprint FROM file WHERE folder_id = ?", (folder_id,)
-        ).fetchall())]
+        ).fetchall()
+        if version >= 4:  # files that couldn't be read came in version 4 (BF-6)
+            first += con.execute(
+                "SELECT path, size, NULL FROM unread WHERE folder_id = ? AND accepted_id IS NULL",
+                (folder_id,)).fetchall()
+        lists = [(registered_at, first)]
         if version >= 3:  # accepted lists came in version 3
             for accepted_id, accepted_at in con.execute(
                     "SELECT id, accepted_at FROM accepted WHERE folder_id = ? ORDER BY id",
                     (folder_id,)).fetchall():
-                lists.append((accepted_at, con.execute(
+                files = con.execute(
                     "SELECT path, size, fingerprint FROM accepted_file WHERE accepted_id = ?",
-                    (accepted_id,)).fetchall()))
+                    (accepted_id,)).fetchall()
+                if version >= 4:
+                    files += con.execute(
+                        "SELECT path, size, NULL FROM unread WHERE accepted_id = ?",
+                        (accepted_id,)).fetchall()
+                lists.append((accepted_at, files))
         lists_of[path] = lists
     if not lists_of:
         raise ValueError(f"There are no folders in {register_file} yet (OV-11)")
@@ -203,6 +223,15 @@ def _order(path: str) -> list[str]:
     return [part.lower() for part in PureWindowsPath(path).parts]
 
 
-def _fingerprints(listing: Listing) -> dict[str, str]:
+def _fingerprints(listing: Listing) -> dict[str, str | None]:
     """Each place's fingerprint, the way the check compares them."""
     return {place: fp for place, _, fp in listing}
+
+
+def _compared(before: Listing, after: Listing) -> CheckResult:
+    """A list compared with the one before it, the way Check compares (OV-9,
+    BF-7): a file the later list has without a fingerprint couldn't be read
+    then, so it's neither changed, new nor missing."""
+    read = {place: fp for place, _, fp in after if fp is not None}
+    unread = [(place, "") for place, _, fp in after if fp is None]  # the reason isn't needed
+    return compare(_fingerprints(before), read, unread)

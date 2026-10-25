@@ -14,14 +14,15 @@ def overview_report(register_file: str, result: Overview) -> str:
         "From the register file only: the folders weren't read.",  # OV-2
         "",
         f"Folders: {len(result.folders):,}, files: {result.files:,}, "
-        f"size: {size_words(result.size)}, empty files: {result.empty_files:,}.",  # OV-3, OV-8
+        f"size: {size_words(result.size)}{_unread(result.unread)}, "
+        f"empty files: {result.empty_files:,}.",  # OV-3, OV-8
         "",
     ]
     for folder in result.folders:  # OV-3, OV-5
         kinds = ", ".join(f"{kind.lower()} {count:,}" for kind, count in folder.kinds.items())
         lines += [
             folder.path,
-            f"  Files: {folder.files:,}, size: {size_words(folder.size)}. "
+            f"  Files: {folder.files:,}, size: {size_words(folder.size)}{_unread(folder.unread)}. "
             f"Newest list: {_when(folder.listed_at)}. Changes accepted: {folder.accepted:,}.",
             f"  {kinds[0].upper()}{kinds[1:]}.",
         ]
@@ -89,6 +90,11 @@ def _changes(result: Overview) -> list[str]:
 def _count(number: int, one: str, many: str) -> str:
     """1 group, 2 groups."""
     return f"{number:,} {one if number == 1 else many}"
+
+
+def _unread(count: int) -> str:
+    """How many files couldn't be read, shown only when there are some (v1.3)."""
+    return f", couldn't read: {count:,}" if count else ""
 
 
 def _when(saved_at: str) -> str:

@@ -1,8 +1,10 @@
 # Overview
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "13 · Discovery: where is my stuff"
+**Changes:** v1.1 (2026-10-25): details for program folders and other's
+endings. Made through a pull request.
 
 The overview answers where Ernie's files are, from what the register file
 already knows (docs/05-discovery-plan.md, questions 2 to 4): what kind of
@@ -94,6 +96,9 @@ Details:
 - The ending is the part of the name after its last dot. A name with no
   dot, or whose only dot comes first (like `.gitignore`), has no ending;
   "other" shows it as "(none)".
+- Program folders' names are compared ignoring capitals too, like endings.
+- Other's ten endings (OV-5): the ones with the most files; endings with
+  the same number go in alphabetical order, "(none)" first.
 - Sizes: 1 KB is 1,024 bytes, as Windows counts; shown with one decimal,
   like 47.4 GB. Under 1 KB, in bytes.
 - Order: folders by their path, ignoring capitals (like summaries); the

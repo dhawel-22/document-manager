@@ -1,6 +1,6 @@
 # Summaries
 
-**Version:** 1.5 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.6 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "04 · Finish Phase 0"
 **Changes:** v1.1 (2026-10-23): details for SM-3 and SM-6, below. Made
@@ -12,6 +12,8 @@ v1.4 (2026-10-23): summaries lists documents in the same order as
 summarize. Made through a pull request.
 v1.5 (2026-10-24): an older register file is brought up to date only
 when summaries are saved. Made through a pull request.
+v1.6 (2026-10-25): busy folders (spec/busy-folders.md). Made through a
+pull request.
 
 The summaries feature finds the Word documents in a registered folder,
 reads them, and saves each one's location and summary in the register file
@@ -69,6 +71,10 @@ Details (v1.1):
   version only when the summaries are saved, after every document has
   been read. A run that is stopped (spec/window.md, WN-14), or fails
   while reading, leaves the register file exactly as it was.
+- Busy folders (v1.6): a document or subfolder that's gone when its turn
+  comes is left out, not listed as couldn't read. If the folder itself
+  can't be reached any more, the run stops and nothing is saved
+  (spec/busy-folders.md, BF-3, BF-4).
 
 Commands (v1.3), from PowerShell in the project folder:
 

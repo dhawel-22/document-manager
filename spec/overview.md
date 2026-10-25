@@ -1,12 +1,14 @@
 # Overview
 
-**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "13 · Discovery: where is my stuff"
 **Changes:** v1.1 (2026-10-25): details for program folders and other's
 endings. Made through a pull request.
 v1.2 (2026-10-25): the overview's words, with two lines of the example
 lined up. Made through a pull request.
+v1.3 (2026-10-25): OV-3, files that couldn't be read
+(spec/busy-folders.md). Made through a pull request.
 
 The overview answers where Ernie's files are, from what the register file
 already knows (docs/05-discovery-plan.md, questions 2 to 4): what kind of
@@ -18,7 +20,7 @@ takes seconds even for folders that take hours to check.
 |---|---|
 | OV-1 | The overview only reads the register file. It never opens the folders or their files, and never changes anything. |
 | OV-2 | It covers every folder in the register file, each by its newest list, the one Check uses (CK-1). Its first lines say that it comes from the register file, not from the folders as they are now. |
-| OV-3 | Folders: for each folder, its files, their total size, the date of its newest list, and how many times its changes were accepted. Then the totals for all folders. |
+| OV-3 | Folders: for each folder, its files, their total size, how many couldn't be read (spec/busy-folders.md), the date of its newest list, and how many times its changes were accepted. Then the totals for all folders. |
 | OV-4 | Kinds: each file is one of five kinds, by the ending of its name (like `.docx`): documents; pictures, sound and video; program files; backups and archives; or other (the table below). A file inside a program folder, like `.git` or `node_modules`, is a program file whatever its ending. |
 | OV-5 | For each kind, the number of files and their size in all folders, and the number of files in each folder. For "other", also its ten most common endings, so what isn't sorted is still seen. |
 | OV-6 | Duplicates: files with the same fingerprint (FP-2) in more than one place, in one folder or in several. Each group shows its size and every place where it is. The groups whose extra copies take the most space come first. |
@@ -121,6 +123,11 @@ Details:
   kinds, the numbers of files and the sizes are lined up on the right.
   Other's endings show with their dot, like `.zz 3`. With no duplicates,
   or no accepted changes, the overview says "none".
+- Couldn't read (v1.3): shown only when there are some, after the size,
+  like "Files: 6, size: 3.0 MB, couldn't read: 1.", and the same in the
+  totals line. Such a file has no fingerprint, so it's never in a
+  duplicate group (OV-6), and its size counts when Windows gave it.
+  Changes (OV-9) are counted the way Check counts them (BF-7).
 
 Left for later:
 - How often folders change: the register knows only accepted changes.

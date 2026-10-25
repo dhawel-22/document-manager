@@ -1,6 +1,6 @@
 # Window
 
-**Version:** 1.3 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.4 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "06 · The first window"
 **Changes:** v1.1 (2026-10-23): the window command says one line when the
@@ -9,6 +9,9 @@ v1.2 (2026-10-23): how a box's path is read, and errors the commands
 don't expect. Made through a pull request.
 v1.3 (2026-10-23): the Accept button (spec/accept.md). Made through a
 pull request.
+v1.4 (2026-10-24): big folders: the work runs in the background, with
+counts, a Stop button, and a question when closing. Made through a pull
+request.
 
 The window lets Ernie run the five commands (spec/report.md,
 spec/summaries.md, spec/accept.md) by clicking instead of typing. It's kept thin: the work
@@ -25,12 +28,16 @@ project folder, opens it:
 | WN-3 | Five buttons, Register, Check, Summarize, Summaries and Accept, each do exactly what the command of the same name does, with the same rules, on the folder and register file in the boxes. |
 | WN-4 | The results show the same words, in the same order, as the command prints. The tags changed, new, missing and couldn't read each have their own colour. |
 | WN-5 | Pressing a button first clears the old results, so old results are never shown as new ones. |
-| WN-6 | While a button's work runs, the status line says "Working…" and no button can be pressed. When it ends, the status line says which button ran, on which folder, and the time it finished (this computer's time). |
+| WN-6 | While a button's work runs, the status line says "Working…", the boxes can't be changed, and no button can be pressed except Stop (WN-14). When it ends, the status line says which button ran, on which folder, and the time it finished (this computer's time). |
 | WN-7 | When something goes wrong, the status line shows the same one plain line as the command, in red, and the results stay empty: nothing is reported as fine (RP-4). |
 | WN-8 | If a box is empty, nothing runs; the status line says which box to fill. |
 | WN-9 | The window never opens, changes, moves or deletes the documents. Only Register, Summarize and Accept write anything, and only to the register file, as the commands do. |
 | WN-10 | The window saves nothing of its own: no settings and no history. The boxes start empty each time it opens. |
 | WN-11 | Nothing leaves this computer. The window doesn't use the internet, and AI summaries stay off (SM-9). |
+| WN-12 | The work runs in the background, so the window keeps answering while it runs: it can be moved, resized and scrolled. |
+| WN-13 | While the work runs, the status line counts: first the files found, "Working… 1500 files found so far.", then the files read, "Working… 120 of 1500 files read." Summarize counts the Word documents it reads: "Working… 12 of 72 Word documents read." |
+| WN-14 | A Stop button can be pressed while the work runs. The work stops after the file it's reading, nothing is saved, the results stay empty, and the status line says "<Button> stopped at <time> (this computer's time). Nothing was saved." If every file was already read, Stop is too late: the work finishes as usual, and the status line says so (WN-6). |
+| WN-15 | Closing the window while the work runs first asks "Work is still running. Stop it and close the window?" with Yes and No; No is picked unless Yes is clicked. Yes stops the work as Stop does, then the window closes. |
 
 How it's proven:
 - A test for every rule, with pytest-qt, which fills the boxes and clicks
@@ -42,6 +49,15 @@ How it's proven:
 - A demo run the way Ernie would: he opens the window with the command
   and clicks through on fake documents. The fake documents' fingerprints
   must be the same before and after.
+- For WN-12 to WN-15, a stand-in for the work waits while the test moves
+  the window, reads the count, presses Stop or closes the window. If the
+  window stops answering, the test fails within seconds instead of
+  waiting forever.
+- For WN-14, on fake documents: after Stop, the register file is the
+  same as before, or not made at all.
+- A try-out by Ernie on a big real folder he picks, read-only: he moves
+  the window while Check runs, watches the count, and presses Stop once.
+  Every file's fingerprint must be the same before and after.
 
 On trust (technical):
 - PySide6 and pytest-qt, pinned to exact versions in requirements-dev.txt.
@@ -49,6 +65,13 @@ On trust (technical):
   the same engine and report code as the commands, never a copy of it.
 - On GitHub's computer, the tests run the window without showing it on a
   screen. The first check run will show whether that works.
+- The work runs in a second thread; Qt's signals bring the counts and the
+  results back to the window.
+- The engine's reading steps take an optional counter, called as each
+  folder is listed and each file is read. The window's counter updates
+  the status line, and stops the work when Stop was pressed, before
+  anything is saved. The commands don't pass a counter, so they work and
+  print exactly as before.
 
 Details:
 - WN-1 (v1.1): when the window opens, the command says so in one line:
@@ -71,9 +94,11 @@ Details:
   words, but PowerShell shows "?" for characters it can't show.
 - Windows' own picker may remember the last folder it showed. That's
   Windows, not the program (WN-10).
+- Accept (v1.4): Accept reads the folder twice, once to show the changes
+  and again after Yes, so it counts twice, and Stop works in both. While
+  the question is open, nothing runs.
+- Summaries (v1.4): it reads only the register file, so it shows no count.
+- Stop (v1.4): a very big file is read to its end before the work stops.
 
 Left for later:
-- Big folders: for now the window waits while the work runs, which is fine
-  for fake documents. For real folders, the work should run in the
-  background so the window doesn't freeze.
 - Sorting, searching, opening a document from the list, and AI summaries.

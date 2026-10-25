@@ -14,6 +14,7 @@ test fails instead of waiting forever.
 """
 
 import hashlib
+import importlib
 import re
 import socket
 import sys
@@ -26,7 +27,6 @@ from PySide6.QtWidgets import QMessageBox, QPushButton
 from document_manager.__main__ import main
 from document_manager.check import check_folder
 from document_manager.commands import COMMANDS
-from document_manager.fingerprint import fingerprint
 from document_manager.window import (
     ACCEPT_QUESTION, BUTTONS, CLOSE_QUESTION, RED, TAGS, WORKING, Window, Work,
 )
@@ -38,6 +38,10 @@ STOPPED = re.compile(r"(Register|Check|Summarize|Summaries|Accept) stopped at \d
                      r" \(this computer's time\)\. Nothing was saved\.")
 HOLD = 5  # seconds
 WAIT = 10_000  # milliseconds
+# The engine's steps that read each file: for Register, Check and Accept,
+# and for Summarize.
+REGISTER_READS = "document_manager.register.fingerprint_of"
+SUMMARIZE_READS = "document_manager.summaries.fingerprint"
 # fake_docs() has two files at the top and one in letters.
 FOUND = [f"{WORKING} 2 files found so far.", f"{WORKING} 3 files found so far."]
 
@@ -141,18 +145,23 @@ def statuses(monkeypatch, window):
     return said
 
 
-def stop_while_reading(qtbot, monkeypatch, window, command, module):
-    """Click a button, and press Stop while the engine (in this module) reads
-    its first file. Then wait until the work has ended."""
+def stop_while_reading(qtbot, monkeypatch, window, command, reader, after=0):
+    """Click a button, and press Stop while the engine reads a file, once it
+    has read `after` files. reader names the engine's step that reads a file.
+    Then wait until the work has ended."""
     reading, go_on = threading.Event(), threading.Event()
+    module, name = reader.rsplit(".", 1)
+    real = getattr(importlib.import_module(module), name)
+    read = []
 
-    def held(path):
-        if not reading.is_set():
+    def held(file):
+        read.append(file)
+        if len(read) == after + 1:
             reading.set()
             go_on.wait(HOLD)
-        return fingerprint(path)
+        return real(file)
 
-    monkeypatch.setattr(f"document_manager.{module}.fingerprint", held)
+    monkeypatch.setattr(reader, held)
     click(qtbot, window.command_buttons[command])
     qtbot.waitUntil(reading.is_set, timeout=WAIT)
     click(qtbot, window.stop_button)
@@ -490,7 +499,7 @@ def test_wn14_a_stopped_register_makes_no_register_file(qtbot, tmp_path, monkeyp
     docs = fake_docs(tmp_path)
     reg = tmp_path / "register.db"
     window = make_window(qtbot, docs, reg)
-    stop_while_reading(qtbot, monkeypatch, window, "register", "register")
+    stop_while_reading(qtbot, monkeypatch, window, "register", REGISTER_READS)
     assert window.status.text().startswith("Register stopped at ")
     assert not reg.exists()
 
@@ -501,7 +510,7 @@ def test_wn14_a_stopped_summarize_saves_nothing(qtbot, tmp_path, monkeypatch):
     window = make_window(qtbot, docs, reg)
     press(qtbot, window, "register")
     before = reg.read_bytes()
-    stop_while_reading(qtbot, monkeypatch, window, "summarize", "summaries")
+    stop_while_reading(qtbot, monkeypatch, window, "summarize", SUMMARIZE_READS)
     assert window.status.text().startswith("Summarize stopped at ")
     assert reg.read_bytes() == before
 
@@ -510,8 +519,9 @@ def test_wn14_a_stopped_accept_saves_nothing(qtbot, tmp_path, monkeypatch):
     docs, reg, window = registered_and_changed(qtbot, tmp_path)
     before = reg.read_bytes()
     answer_question(monkeypatch, QMessageBox.StandardButton.Yes)
-    # Accept's second reading, after Yes, is the one held and stopped.
-    stop_while_reading(qtbot, monkeypatch, window, "accept", "register")
+    # Accept's first reading, before the question, reads the three files.
+    # Its second reading, after Yes, is the one held and stopped.
+    stop_while_reading(qtbot, monkeypatch, window, "accept", REGISTER_READS, after=3)
     assert window.status.text().startswith("Accept stopped at ")
     assert window.results.toPlainText() == ""
     assert reg.read_bytes() == before

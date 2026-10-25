@@ -12,7 +12,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from document_manager.fingerprint import fingerprint
-from document_manager.register import VERSION, Counter, all_files, counted, prepare_register
+from document_manager.register import (
+    VERSION, Counter, all_files, counted, gone, prepare_register,
+)
 from document_manager.word import CouldNotRead, Summary, summarize_document
 
 METHOD = "stage-a"  # how the summaries are made (SM-2, SM-3)
@@ -93,6 +95,7 @@ def _has_summaries(con: sqlite3.Connection) -> bool:
 def _summarize(folder: Path, latest: dict,
                counter: Counter | None) -> tuple[list[tuple], SummarizeResult]:
     """Read every Word document and work out what to save (SM-1, SM-4, SM-6).
+    A document that's gone when its turn comes is left out (v1.6, BF-3).
 
     The documents are only read (SM-5).
     """
@@ -107,6 +110,8 @@ def _summarize(folder: Path, latest: dict,
         try:
             fp = fingerprint(path)
         except OSError as error:
+            if gone(folder, path):  # BF-3, BF-4
+                continue
             fp, problem = None, f"{type(error).__name__}: {error}"
         else:
             if place in latest and latest[place][0] == fp:  # unchanged (SM-4)
@@ -118,6 +123,8 @@ def _summarize(folder: Path, latest: dict,
             try:
                 summary, problem = summarize_document(path), None
             except CouldNotRead as error:
+                if gone(folder, path):  # gone while it was read (BF-3, BF-4)
+                    continue
                 problem = str(error)
         if problem is None:
             result.summarized.append(place)

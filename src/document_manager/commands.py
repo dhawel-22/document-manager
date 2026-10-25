@@ -1,5 +1,5 @@
 """The commands' words, made in one place (spec/report.md, spec/summaries.md,
-spec/accept.md, spec/overview.md).
+spec/accept.md, spec/overview.md, spec/busy-folders.md).
 
 The commands print these words and the window shows them, so both always
 say exactly the same (spec/window.md, WN-3, WN-4).
@@ -11,7 +11,7 @@ from document_manager.accept import accept_folder
 from document_manager.check import CheckResult, check_folder
 from document_manager.overview import overview
 from document_manager.overview_report import overview_report
-from document_manager.register import Counter, register_folder
+from document_manager.register import Counter, Files, register_folder
 from document_manager.report import report
 from document_manager.summaries import saved_summaries, summarize_folder
 from document_manager.summary_report import summaries_report, summarize_report
@@ -30,8 +30,8 @@ def run(command: str, folder: str, register_file: str,
     so it has nothing to count."""
     try:
         if command == "register":
-            count = register_folder(folder, register_file, counter)
-            return 0, f"Registered {folder}. Files listed: {count}."  # RP-1
+            files = register_folder(folder, register_file, counter)
+            return 0, listed("Registered", folder, files)  # RP-1
         if command == "check":
             return 0, report(check_folder(folder, register_file, counter))  # RP-2, RP-3
         if command == "summarize":
@@ -62,6 +62,8 @@ def changes_to_accept(folder: str, register_file: str,
     except PROBLEMS as error:
         return 1, f"Problem: {error}", None
     if not (found.changed or found.new or found.missing):
+        if found.could_not_read:  # they aren't changes, so nothing is asked (BF-9)
+            return 0, f"{report(found)}\n{NOTHING_SAVED}", None
         return 0, report(found), None
     return 0, report(found), found
 
@@ -70,7 +72,18 @@ def accept(folder: str, register_file: str, shown: CheckResult,
            counter: Counter | None = None) -> tuple[int, str]:
     """Accept the changes the person was shown and said yes to (AC-2)."""
     try:
-        count = accept_folder(folder, register_file, shown, counter)
+        files = accept_folder(folder, register_file, shown, counter)
     except PROBLEMS as error:
         return 1, f"Problem: {error}"  # RP-4
-    return 0, f"Accepted {folder}. Files listed: {count}."
+    return 0, listed("Accepted", folder, files)
+
+
+def listed(done: str, folder: str, files: Files) -> str:
+    """How many files a new list holds (RP-1, AC-2), then each one that
+    couldn't be read, with the reason (spec/busy-folders.md, Details)."""
+    if not files.unread:
+        return f"{done} {folder}. Files listed: {files.count}."
+    lines = [f"{done} {folder}. Files listed: {files.count}, couldn't read: {len(files.unread)}."]
+    lines += [f"  couldn't read  {place}  {why}"
+              for place, why in sorted((place, why) for place, _size, why in files.unread)]
+    return "\n".join(lines)

@@ -2,6 +2,7 @@
 
 import hashlib
 from pathlib import Path
+from typing import BinaryIO
 
 
 def fingerprint(path: Path | str) -> str:
@@ -11,4 +12,9 @@ def fingerprint(path: Path | str) -> str:
     is raised, never hidden behind a made-up value (FP-5).
     """
     with open(path, "rb") as f:
-        return hashlib.file_digest(f, "sha256").hexdigest()
+        return fingerprint_of(f)
+
+
+def fingerprint_of(f: BinaryIO) -> str:
+    """The same, for a file already open for reading (FP-1)."""
+    return hashlib.file_digest(f, "sha256").hexdigest()

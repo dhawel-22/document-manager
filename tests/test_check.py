@@ -1,5 +1,8 @@
 """Tests for the check rules in spec/check.md (CK-1 to CK-8)."""
 
+import os
+from pathlib import Path
+
 import pytest
 
 from document_manager.check import CheckResult, check_folder
@@ -78,14 +81,17 @@ def test_ck7_unregistered_folder_is_refused(tmp_path):
         check_folder(other, reg)
 
 
-def test_ck8_unreadable_file_stops_the_check(tmp_path, monkeypatch):
+def test_ck8_unreadable_subfolder_stops_the_check(tmp_path, monkeypatch):
     docs, reg = registered_docs(tmp_path)
+    scandir = os.scandir
 
-    def cannot_read(path):
-        raise PermissionError(f"can't read {path}")
+    def denied(path):  # Windows says no to listing letters
+        if Path(path).name == "letters":
+            raise PermissionError(13, "Access is denied", str(path))
+        return scandir(path)
 
-    monkeypatch.setattr("document_manager.check.fingerprint", cannot_read)
-    with pytest.raises(PermissionError, match="empty.txt"):
+    monkeypatch.setattr(os, "scandir", denied)
+    with pytest.raises(PermissionError, match="letters"):
         check_folder(docs, reg)
 
 

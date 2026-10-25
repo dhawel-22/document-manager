@@ -574,3 +574,90 @@ Next: 12 · Phase 3: all network files. First, Ernie decides how big the
 first step is, and whether Stop should pick up where it left off; then
 Register and Check in the window, read-only, with every file's
 fingerprint checked before and after.
+
+## 12 · Phase 3: all network files (2026-10-24 to 2026-10-25)
+Purpose: start Phase 3 on drive T:, read-only: how big the first step
+is, and whether Stop picks up where it left off; then Register and
+Check, with every file's fingerprint checked before and after.
+Decided: the first step, one folder of 337 files (Ernie); AI, when it
+comes, runs on this computer, like Ollama (Ernie); the goal in the
+opening document stays as it is, and a draft D-023 (few users, few
+changes) wasn't made (Ernie); the program has two parts, discovery now
+and a vault later, docs/05-discovery-plan.md (Ernie, #75); 37 more
+folders on T:, everything except the backup folder (Ernie).
+Done:
+- A count of T:, look only: 695,313 files in 60,644 folders, 315 GB.
+  Every folder could be read. 99% of the files (690,755) are in one
+  backup folder; 549,633 of those are program libraries, Git history
+  and caches. About 940 Word and PDF files in all.
+- Speed on T:: about 29 MB a second for big files, and about 27 small
+  files a second. Registering all of T: would take about 10 hours, and
+  each Check as long again. Just listing it took 12½ minutes.
+- The first step (337 files, 47.4 GB): Ernie clicked Register and Check
+  in the window. Check said "Nothing has changed. Files checked: 337."
+  and took about 28 minutes. Every file was the same before and after,
+  the register's list matched fingerprints worked out separately, and
+  the register file gained only that folder.
+- The discovery plan (#75): what discovery finds out, where, how it
+  works, what it still needs before all of T:, and when it's done.
+- 37 more folders (4,136 files, 9.3 GB), in 33 minutes: after a test
+  run on a copy of the register file, Claude ran the register and check
+  commands exactly as typed. All 37 were registered, and each check said
+  "Nothing has changed". Every file was the same before and after, each
+  new list matched the before-check exactly, and the register file's
+  older content was unchanged.
+- T: is now registered and checked except the backup folder and 2 loose
+  files: 4,556 files in all.
+Lessons:
+- At the start, thinking was "medium" again; Ernie switched it to "max".
+- A run fails if one file is deleted, renamed or locked while it runs,
+  and Accept saves nothing if anything changed between its two reads.
+  On a busy drive, the longer the run, the likelier that is.
+- More than once the talk went into technical detail, and Ernie moved it
+  to the higher question: a vault, or the files where they are. Start
+  from what the program is for.
+- Ernie expects Claude to know a technical finding, not to ask him to
+  confirm it.
+- Measuring how busy T: is on a Sunday, when nobody works there, would
+  have shown nothing; Ernie stopped it.
+- Claude said Windows' memory might speed up Check after Register. It
+  didn't: both took about 28 minutes.
+- Design notes Ernie pasted matched Claude's approach for T:: watch for
+  changes while the program runs, plus a sweep by dates at night.
+- Paperless-ngx's website refused automated reading; its documentation
+  was read from its public GitHub project instead. It's a vault: it
+  takes documents into its own storage.
+- One "go" ran 37 folders through the typed commands, instead of 74
+  clicks, with a test run on a copy first.
+- The mode stayed Manual after #75 was merged.
+Open: what discovery still needs before all of T: (discovery plan,
+section 4): a run that carries on past a file that changes, a long run
+that picks up after a stop, and a report; the backup folder on T:, and
+2 loose files there; Y: (system backups), Ernie to decide; Google Drive
+and this computer's own folders; the vault, later, with check-out and
+check-in; Register reads every file before it refuses a folder that's
+already registered (RG-5); only Word documents are summarized, not
+PDFs; AI summaries (Stage B), to run on this computer; the register
+saves a network folder under its network address, not its drive
+letter; online-only Drive files weren't looked at; open question 4 can
+be answered in the opening document (Ernie has no Google Docs); Check
+on docs and spec shows changes from merged pull requests, for Ernie to
+accept; the register file D:\python\document-manager-register.db stays,
+now with 43 folders; why the mode switches after merges; the register
+file picker's button says "Save"; "Starts" in a summary includes
+headings (SM-3), Ernie to decide; the demo folder D:\python\demo-window
+stays until Ernie deletes it; old branches on GitHub, now also
+thread-11-log, thread-11-log-summarize and discovery-plan; the old name
+"dhawel-22" saved in the GitHub tool; numbers in names sort character
+by character ("Report 10" before "Report 2"); the four questions of the
+reuse plan (docs/02-reuse-plan.md, section 7); a drill where the AI
+account tries to merge; rules 4 and 7 still only ask; the flashing
+check script window; tools from the opening document not set up yet
+(pre-commit, Pydantic/pandera, check-out/check-in scripts); why the
+PowerShell command swapped the file names and contents (thread 03);
+open questions 2, 3, 5 and 6.
+Next: 13 · Discovery: where is my stuff. First, the report that answers
+where Ernie's stuff is (discovery plan, questions 2 to 4), on the
+folders already registered, with its rules in spec/ first; then a run
+that carries on past a file that changes, and a long run that picks up
+after a stop.

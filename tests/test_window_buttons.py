@@ -1,10 +1,11 @@
 """Tests for the window's buttons, spec/window.md (WN-3 to WN-9, WN-11 to
-WN-15), and the Accept button (spec/accept.md).
+WN-15), the Accept button (spec/accept.md), and the Overview button
+(spec/overview.md, OV-13).
 
 Some tests click the buttons on fake documents made for the tests. Others
-use a stand-in for run() (src/document_manager/commands.py), to see what
-the window asks for, how it looks while a command runs, or how it shows
-the words it gets back.
+use a stand-in for run() or run_overview() (src/document_manager/commands.py),
+to see what the window asks for, how it looks while a command runs, or how
+it shows the words it gets back.
 
 The work runs in a second thread (WN-12), so the tests wait for it to end.
 A stand-in that waits for a test goes on by itself after HOLD seconds, and
@@ -31,8 +32,8 @@ from document_manager.window import (
 )
 
 FOLDER, REGISTER = r"D:\fake\docs", r"D:\fake\register.db"
-FINISHED = re.compile(r"(Register|Check|Summarize|Summaries|Accept) finished on .+ at \d\d:\d\d"
-                      r" \(this computer's time\)\.")
+FINISHED = re.compile(r"(Register|Check|Summarize|Summaries|Accept|Overview) finished on .+"
+                      r" at \d\d:\d\d \(this computer's time\)\.")
 STOPPED = re.compile(r"(Register|Check|Summarize|Summaries|Accept) stopped at \d\d:\d\d"
                      r" \(this computer's time\)\. Nothing was saved\.")
 HOLD = 5  # seconds
@@ -90,6 +91,14 @@ def stand_in_run(monkeypatch, answer=(0, "Fake words."), while_running=None):
         return answer
 
     monkeypatch.setattr("document_manager.window.run", stand_in)
+    return asked
+
+
+def stand_in_run_overview(monkeypatch, answer=(0, "Fake overview.")):
+    """Replace run_overview() with a stand-in that notes what it was asked."""
+    asked = []
+    monkeypatch.setattr("document_manager.window.run_overview",
+                        lambda register_file: asked.append(register_file) or answer)
     return asked
 
 
@@ -573,3 +582,67 @@ def test_wn15_yes_after_the_work_ended_closes_at_once(qtbot, monkeypatch):
     click(qtbot, window.command_buttons["check"])
     window.close()
     assert not window.isVisible()
+
+
+def test_wn3_six_buttons_in_order(qtbot):
+    window = make_window(qtbot)
+    assert [button.text() for button in window.command_buttons.values()] == [
+        "Register", "Check", "Summarize", "Summaries", "Accept", "Overview"]
+
+
+def test_ov13_overview_uses_only_the_register_file_box(qtbot, monkeypatch):
+    asked = stand_in_run_overview(monkeypatch)
+    window = make_window(qtbot, "", f'"{REGISTER}"')
+    press(qtbot, window, "overview")
+    assert asked == [REGISTER]
+    assert window.results.toPlainText() == "Fake overview."
+    assert FINISHED.fullmatch(window.status.text())
+    assert window.status.text().startswith(f"Overview finished on {REGISTER} at ")
+
+
+def test_ov13_wn8_overview_names_only_the_register_file_box(qtbot, monkeypatch):
+    asked = stand_in_run_overview(monkeypatch)
+    window = make_window(qtbot, FOLDER, "  ")
+    press(qtbot, window, "overview")
+    assert window.status.text() == "Fill in the register file box first."
+    window.folder.setText("")
+    press(qtbot, window, "overview")
+    assert window.status.text() == "Fill in the register file box first."
+    assert asked == []
+
+
+def test_ov13_overview_shows_the_commands_words(qtbot, tmp_path, capsys):
+    docs = fake_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    window = make_window(qtbot, docs, reg)
+    press(qtbot, window, "register")
+    window.folder.setText("")  # Overview doesn't need it
+    press(qtbot, window, "overview")
+    main(["overview", str(reg)])
+    assert capsys.readouterr().out == window.results.toPlainText() + "\n"
+    words = window.results.toPlainText()
+    assert words.startswith(f"Overview of {reg}\n")
+    assert not any(line.startswith(tuple(TAGS)) for line in words.splitlines())  # no tag colours
+
+
+def test_ov13_overview_counts_nothing(qtbot, tmp_path, monkeypatch):
+    docs = fake_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    window = make_window(qtbot, docs, reg)
+    press(qtbot, window, "register")
+    monkeypatch.setattr(Work, "EVERY", 0)  # every count would go to the window
+    said = statuses(monkeypatch, window)
+    press(qtbot, window, "overview")  # it reads only the register file
+    assert said[:-1] == [WORKING]
+    assert FINISHED.fullmatch(said[-1])
+
+
+def test_ov13_a_problem_shows_in_red(qtbot, tmp_path):
+    missing = tmp_path / "missing.db"
+    window = make_window(qtbot, "", missing)
+    window.results.setPlainText("Old words.")
+    press(qtbot, window, "overview")
+    assert window.status.text().startswith("Problem: ")
+    assert RED in window.status.styleSheet()
+    assert window.results.toPlainText() == ""
+    assert not missing.exists()

@@ -661,3 +661,79 @@ where Ernie's stuff is (discovery plan, questions 2 to 4), on the
 folders already registered, with its rules in spec/ first; then a run
 that carries on past a file that changes, and a long run that picks up
 after a stop.
+
+## 13 · Discovery: where is my stuff (2026-10-25)
+Purpose: the report that answers where Ernie's stuff is (discovery plan,
+questions 2 to 4), on the folders already registered, with its rules in
+spec/ first.
+Decided: the overview's rules, spec/overview.md, OV-1 to OV-13, and the
+Overview button, spec/window.md v1.5 (Ernie, #77); the kinds table, the
+command's name and its words (On trust); stay the course: a video about
+an AI assistant that can change files ("Jarvis") changes nothing (Ernie).
+Done:
+- The overview's rules (#77): it reads only the register file, never the
+  folders, and shows each folder's files and kinds, the duplicates, the
+  empty files and the accepted changes, with a note that only accepted
+  changes are known.
+- The engine (#78), the words and the overview command (#79), and the
+  Overview button (#80), with spec/overview.md v1.1 and v1.2 for details.
+  36 new tests, one of which checks that the spec's example is exactly
+  what the command shows. All 181 tests pass on GitHub.
+- Each draft was tested in the scratch folder and broken on purpose, in
+  34 ways in all; the tests caught every one.
+- On the real register file, the overview's counts matched counts worked
+  out separately: 43 folders, 5,727 files, 90.9 GB, 21 empty files;
+  1,217 documents, 662 pictures, sound and video, 3,583 program files,
+  128 backups and archives, 137 other; 603 groups of duplicates with
+  1,483 extra copies, 6.8 GB. It takes under a second.
+- A try-out by Ernie in the window: Overview on the real register file
+  showed the same first counts, and the register file's fingerprint,
+  size and last-changed time were the same before and after.
+Lessons:
+- At the start, thinking was "medium" again; Ernie switched it to "max".
+- The first full test run of the button hung for 10 minutes: a test
+  helper hangs inside Qt on an empty line. A run with a time limit and a
+  printout of where it was stuck found it. Test runs now have a time
+  limit.
+- A test that runs a command as typed uses the project folder's code,
+  not the draft's, unless the draft's code is named first (PYTHONPATH).
+- Claude said 17 new tests; there were 18. Count from the record.
+- A combined command's box was declined once; nothing ran. Smaller steps,
+  each said first, went through.
+- Ernie's window from the night before was still open with the old code;
+  it was closed before the try-out.
+- The mode stayed Manual after all four merges (#77 to #80).
+Open: what changes, and how often (question 4): the register knows only
+accepted changes, and each file's last-changed date (the sweep by dates)
+could answer it; a run that carries on past a file that changes, and a
+long run that picks up after a stop (discovery plan, section 4); the
+overview's dates are in UTC while the window's status line uses this
+computer's time; the duplicates fill most of the overview (2,690 of
+2,838 lines on the real register file); the backup folder on T:, and 2
+loose files there; Y: (system backups), Ernie to decide; Google Drive and
+this computer's own folders; the vault, later, with check-out and
+check-in; Register reads every file before it refuses a folder that's
+already registered (RG-5); only Word documents are summarized, not PDFs;
+AI summaries (Stage B), to run on this computer; the register saves a
+network folder under its network address, not its drive letter;
+online-only Drive files weren't looked at; open question 4 can be
+answered in the opening document (Ernie has no Google Docs); Check on
+docs and spec shows changes from merged pull requests, for Ernie to
+accept; the register file D:\python\document-manager-register.db stays,
+with 43 folders; why the mode switches after merges; the register file
+picker's button says "Save"; "Starts" in a summary includes headings
+(SM-3), Ernie to decide; the demo folder D:\python\demo-window stays
+until Ernie deletes it; old branches on GitHub, now also thread-12-log,
+overview-rules, overview-engine, overview-command and overview-button;
+the old name "dhawel-22" saved in the GitHub tool; numbers in names sort
+character by character ("Report 10" before "Report 2"); the four
+questions of the reuse plan (docs/02-reuse-plan.md, section 7); a drill
+where the AI account tries to merge; rules 4 and 7 still only ask; the
+flashing check script window; tools from the opening document not set up
+yet (pre-commit, Pydantic/pandera, check-out/check-in scripts); why the
+PowerShell command swapped the file names and contents (thread 03); open
+questions 2, 3, 5 and 6.
+Next: 14 · Discovery: runs that don't fail. First, a run that carries on
+past a file that's deleted, renamed or locked, and says which one, with
+its rules in spec/ first; then a long run that picks up where it left
+off after a stop.

@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from document_manager.fingerprint import fingerprint
-from document_manager.register import VERSION, all_files, prepare_register
+from document_manager.register import VERSION, Counter, all_files, counted, prepare_register
 from document_manager.word import CouldNotRead, Summary, summarize_document
 
 METHOD = "stage-a"  # how the summaries are made (SM-2, SM-3)
@@ -28,7 +28,8 @@ class SummarizeResult:
     could_not_read: list[tuple[str, str]]  # (place, reason) (SM-6)
 
 
-def summarize_folder(folder: Path | str, register_file: Path | str) -> SummarizeResult:
+def summarize_folder(folder: Path | str, register_file: Path | str,
+                     counter: Counter | None = None) -> SummarizeResult:
     """Summarize every Word document in a registered folder (SM-1) and save
     the new summaries in the register file (SM-2)."""
     folder = Path(folder).resolve(strict=True)
@@ -37,13 +38,13 @@ def summarize_folder(folder: Path | str, register_file: Path | str) -> Summarize
     register_file = Path(register_file).resolve(strict=True)  # never made here
     con = sqlite3.connect(register_file)
     try:
+        folder_id = _registered(con, folder)  # SM-7, before any change
+        latest = _latest(con, folder_id)
+        # Every document is read before anything is saved, and an older
+        # register file is brought up to date only then (v1.5).
+        rows, result = _summarize(folder, latest, counter)
         with con:
-            folder_id = _registered(con, folder)  # SM-7, before any change
             prepare_register(con)
-            latest = _latest(con, folder_id)
-        # Every document is read before anything is saved.
-        rows, result = _summarize(folder, latest)
-        with con:
             con.executemany(
                 "INSERT INTO summary (folder_id, path, fingerprint, made_at, method,"
                 " title, headings, first_words, word_count, problem)"
@@ -70,6 +71,8 @@ def _registered(con: sqlite3.Connection, folder: Path) -> int:
 
 def _latest(con: sqlite3.Connection, folder_id: int) -> dict[str, tuple[str | None, str | None]]:
     """Each document's last saved fingerprint and problem (SM-4)."""
+    if not _has_summaries(con):  # a version 1 register file: nothing summarized yet
+        return {}
     rows = con.execute(
         "SELECT path, fingerprint, problem FROM summary AS s WHERE folder_id = ?"
         " AND id = (SELECT MAX(id) FROM summary WHERE folder_id = s.folder_id"
@@ -79,7 +82,16 @@ def _latest(con: sqlite3.Connection, folder_id: int) -> dict[str, tuple[str | No
     return {path: (fp, problem) for path, fp, problem in rows}
 
 
-def _summarize(folder: Path, latest: dict) -> tuple[list[tuple], SummarizeResult]:
+def _has_summaries(con: sqlite3.Connection) -> bool:
+    """Whether the register file has the summaries table. A version 1
+    register file, made before summaries, doesn't."""
+    return con.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'summary'"
+    ).fetchone() is not None
+
+
+def _summarize(folder: Path, latest: dict,
+               counter: Counter | None) -> tuple[list[tuple], SummarizeResult]:
     """Read every Word document and work out what to save (SM-1, SM-4, SM-6).
 
     The documents are only read (SM-5).
@@ -87,9 +99,9 @@ def _summarize(folder: Path, latest: dict) -> tuple[list[tuple], SummarizeResult
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     rows = []
     result = SummarizeResult(summarized=[], unchanged=0, could_not_read=[])
-    for path in all_files(folder):
-        if path.suffix.lower() not in WORD_FILES:
-            continue
+    documents = [path for path in all_files(folder, counter)
+                 if path.suffix.lower() in WORD_FILES]
+    for path in counted(documents, counter):
         place = path.relative_to(folder).as_posix()
         summary = None
         try:
@@ -153,10 +165,7 @@ def saved_summaries(folder: Path | str, register_file: Path | str) -> list[Saved
     con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
     try:
         folder_id = _registered(con, folder)
-        has_summaries = con.execute(
-            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'summary'"
-        ).fetchone()
-        if not has_summaries:  # a version 1 register file: nothing summarized yet
+        if not _has_summaries(con):  # a version 1 register file: nothing summarized yet
             return []
         rows = con.execute(
             "SELECT path, made_at, title, headings, first_words, word_count, problem"

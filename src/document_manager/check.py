@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from document_manager.fingerprint import fingerprint
-from document_manager.register import VERSION, all_files
+from document_manager.register import VERSION, Counter, all_files, counted
 
 
 @dataclass
@@ -18,7 +18,8 @@ class CheckResult:
     unchanged: int  # CK-1
 
 
-def check_folder(folder: Path | str, register_file: Path | str) -> CheckResult:
+def check_folder(folder: Path | str, register_file: Path | str,
+                 counter: Counter | None = None) -> CheckResult:
     """Compare the folder's files now with its list in the register (CK-1)."""
     folder = Path(folder).resolve(strict=True)
     if not folder.is_dir():
@@ -26,7 +27,7 @@ def check_folder(folder: Path | str, register_file: Path | str) -> CheckResult:
     listed = listed_files(folder, Path(register_file).resolve(strict=True))
     now = {
         path.relative_to(folder).as_posix(): fingerprint(path)
-        for path in all_files(folder)
+        for path in counted(all_files(folder, counter), counter)
     }
     return compare(listed, now)
 

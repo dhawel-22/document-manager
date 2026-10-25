@@ -182,6 +182,23 @@ def test_version_1_register_file_is_brought_up_to_date(tmp_path):
     assert len(query(reg, "SELECT * FROM file")) == 4
 
 
+def test_a_run_that_fails_while_reading_leaves_an_older_register_file_as_it_was(
+        tmp_path, monkeypatch):
+    """v1.5: an older register file is brought up to date only when the
+    summaries are saved."""
+    docs, reg = registered_docs(tmp_path)
+    as_version_1(reg)
+    before = reg.read_bytes()
+
+    def fault(path):
+        raise RuntimeError("a fake fault")
+
+    monkeypatch.setattr("document_manager.summaries.summarize_document", fault)
+    with pytest.raises(RuntimeError, match="a fake fault"):
+        summarize_folder(docs, reg)
+    assert reg.read_bytes() == before
+
+
 def test_check_reads_a_version_1_register_file_as_it_is(tmp_path):
     docs, reg = registered_docs(tmp_path)
     as_version_1(reg)

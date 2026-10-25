@@ -2,6 +2,7 @@
 
 import os
 import sqlite3
+from collections.abc import Callable, Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -16,8 +17,15 @@ STEPS = [
 ]
 VERSION = len(STEPS)
 
+# A counter is told how far a run has got (spec/window.md, WN-13): the files
+# found so far, with no total yet, then the files read out of the total.
+# The window's counter can stop the run, always before anything is saved
+# (WN-14). The commands pass no counter.
+Counter = Callable[[int, int | None], None]
 
-def register_folder(folder: Path | str, register_file: Path | str) -> int:
+
+def register_folder(folder: Path | str, register_file: Path | str,
+                    counter: Counter | None = None) -> int:
     """List every file in the folder and save the list (RG-1, RG-2).
 
     Returns the number of files saved.
@@ -31,7 +39,7 @@ def register_folder(folder: Path | str, register_file: Path | str) -> int:
 
     # Read every file before saving anything, so an unreadable file stops
     # the whole run with nothing saved (RG-6).
-    files = list_files(folder)
+    files = list_files(folder, counter)
 
     con = sqlite3.connect(register_file)
     try:
@@ -69,17 +77,18 @@ def is_registered(con: sqlite3.Connection, folder: Path) -> bool:
     ).fetchone() is not None
 
 
-def list_files(folder: Path) -> list[tuple[str, int, str]]:
+def list_files(folder: Path, counter: Counter | None = None) -> list[tuple[str, int, str]]:
     """Every file's place in the folder, size and fingerprint (RG-1)."""
     return [
         (path.relative_to(folder).as_posix(), path.stat().st_size, fingerprint(path))
-        for path in all_files(folder)
+        for path in counted(all_files(folder, counter), counter)
     ]
 
 
-def all_files(folder: Path) -> list[Path]:
+def all_files(folder: Path, counter: Counter | None = None) -> list[Path]:
     """Every file in the folder and its subfolders. A subfolder that can't be
-    read raises an error instead of being skipped (RG-6)."""
+    read raises an error instead of being skipped (RG-6). The counter is
+    told the files found so far, after each folder."""
 
     def stop(error: OSError) -> None:
         raise error
@@ -87,7 +96,21 @@ def all_files(folder: Path) -> list[Path]:
     found = []
     for root, _dirs, names in os.walk(folder, onerror=stop):
         found.extend(Path(root, name) for name in names)
+        if counter:
+            counter(len(found), None)
     return sorted(found)
+
+
+def counted(paths: list[Path], counter: Counter | None) -> Iterator[Path]:
+    """The paths one at a time. The counter is told none read, then one more
+    after each, so it's told about the last one before anything is saved."""
+    total = len(paths)
+    if counter:
+        counter(0, total)
+    for done, path in enumerate(paths, start=1):
+        yield path
+        if counter:
+            counter(done, total)
 
 
 def prepare_register(con: sqlite3.Connection) -> None:

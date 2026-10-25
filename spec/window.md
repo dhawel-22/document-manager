@@ -1,6 +1,6 @@
 # Window
 
-**Version:** 1.5 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.6 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "06 · The first window"
 **Changes:** v1.1 (2026-10-23): the window command says one line when the
@@ -14,6 +14,8 @@ counts, a Stop button, and a question when closing. Made through a pull
 request.
 v1.5 (2026-10-25): the Overview button (spec/overview.md). Made through a
 pull request.
+v1.6 (2026-10-25): WN-9 and WN-14, long runs pick up after a stop
+(spec/long-runs.md). Made through a pull request.
 
 The window lets Ernie run the six commands (spec/report.md,
 spec/summaries.md, spec/accept.md, spec/overview.md) by clicking instead of typing. It's kept thin: the work
@@ -33,12 +35,12 @@ project folder, opens it:
 | WN-6 | While a button's work runs, the status line says "Working…", the boxes can't be changed, and no button can be pressed except Stop (WN-14). When it ends, the status line says which button ran, on which folder, and the time it finished (this computer's time). |
 | WN-7 | When something goes wrong, the status line shows the same one plain line as the command, in red, and the results stay empty: nothing is reported as fine (RP-4). |
 | WN-8 | If a box is empty, nothing runs; the status line says which box to fill. Overview needs only the register file box. |
-| WN-9 | The window never opens, changes, moves or deletes the documents. Only Register, Summarize and Accept write anything, and only to the register file, as the commands do. |
+| WN-9 | The window never opens, changes, moves or deletes the documents. Only Register, Summarize and Accept write anything, and only to the register file, as the commands do; Register and Check also keep a progress file (spec/long-runs.md). |
 | WN-10 | The window saves nothing of its own: no settings and no history. The boxes start empty each time it opens. |
 | WN-11 | Nothing leaves this computer. The window doesn't use the internet, and AI summaries stay off (SM-9). |
 | WN-12 | The work runs in the background, so the window keeps answering while it runs: it can be moved, resized and scrolled. |
 | WN-13 | While the work runs, the status line counts: first the files found, "Working… 1500 files found so far.", then the files read, "Working… 120 of 1500 files read." Summarize counts the Word documents it reads: "Working… 12 of 72 Word documents read." |
-| WN-14 | A Stop button can be pressed while the work runs. The work stops after the file it's reading, nothing is saved, the results stay empty, and the status line says "<Button> stopped at <time> (this computer's time). Nothing was saved." If every file was already read, Stop is too late: the work finishes as usual, and the status line says so (WN-6). |
+| WN-14 | A Stop button can be pressed while the work runs. The work stops after the file it's reading, nothing is saved in the register file, the results stay empty, and the status line says "<Button> stopped at <time> (this computer's time). Nothing was saved." For Register and Check, it says instead that the next run picks up from there (spec/long-runs.md). If every file was already read, Stop is too late: the work finishes as usual, and the status line says so (WN-6). |
 | WN-15 | Closing the window while the work runs first asks "Work is still running. Stop it and close the window?" with Yes and No; No is picked unless Yes is clicked. Yes stops the work as Stop does, then the window closes. |
 
 How it's proven:

@@ -495,3 +495,78 @@ command swapped the file names and contents (thread 03); open questions
 Next: 11 · Before Phase 3. First, Ernie decides about summaries (leave
 them, change the rule, or AI summaries); then big folders: the window
 keeps working while a command runs, with its rules in spec/ first.
+
+## 11 · Before Phase 3 (2026-10-24)
+Purpose: decide about summaries; then big folders: the window keeps
+working while a command runs, with its rules in spec/ first.
+Decided: summaries stay as they are (Ernie); the big-folder rules,
+spec/window.md v1.4, WN-12 to WN-15, and spec/summaries.md v1.5 (Ernie,
+#70); the count changes at most ten times a second (On trust, #72).
+Done:
+- The big-folder rules (#70): the work runs in the background, with
+  counts, a Stop button, and a question when closing; Summarize brings
+  an older register file up to date only when it saves.
+- The engine's counter (#71): Register, Check, Summarize and Accept tell
+  a counter the files found, then the files read; a counter that stops
+  the run stops it before anything is saved. Its 26 new tests all
+  failed on the old code first.
+- The window (#72): the work runs in a second thread, with the count,
+  Stop, and the question when closing. 13 new tests; five deliberate
+  breaks in a copy of the window were each caught. A speed check on
+  20,000 small fake files: 6.0 to 6.4 seconds in the window, 6.0 for
+  the typed command. 145 tests pass.
+- A try-out by Ernie in the window on a big folder of his own on this
+  computer (1,140 files in 37 folders, 36.7 GB): Register, stopped at
+  about file 500; Register again, which listed all 1,140, so the stopped
+  one had saved nothing; then Check: "Nothing has changed. Files
+  checked: 1140." Every file's fingerprint, size and last-changed time
+  was the same before and after, nothing new appeared, and the
+  register's new list matched fingerprints worked out separately. The
+  register file gained only that folder's list.
+Lessons:
+- At the start, thinking was "medium" again; Ernie switched it to "max".
+- The commit and pull request text for #70 weren't shown with the
+  rules, against the thread 01 lesson; Claude showed them after "go",
+  before committing. From #71 on, they came with the draft.
+- The first speed check kept the window busy in a loop of its own and
+  made it look 60% slower. With the window's real event loop, it took
+  1 to 6% longer. Measure the way the program really runs.
+- On the old window, the new tests couldn't even load, which proved
+  little. Breaking a copy on purpose showed that each rule's tests
+  catch a break.
+- Windows can keep a standard folder somewhere other than the user
+  folder: the usual place held only 12 files, the real one 1,140. Read
+  where Windows keeps a folder before trusting the usual place.
+- Stop throws away what was read: after a Stop at about file 500, the
+  next Register started again from the first file. That's the rule
+  (WN-14), but it costs time on very big folders.
+- In this thread's own copy, the setup test fails, because the
+  project's Python lives in the project folder; all 145 pass there.
+- The mode stayed Manual after all three merges (#70 to #72).
+Open: picking up where Stop left off, for very big folders (Phase 3),
+Ernie to decide; Register reads every file before it refuses a folder
+that's already registered (RG-5), which wastes time on big folders;
+only Word documents are summarized, not PDFs; AI summaries (Stage B);
+the register saves a network folder under its network address, not its
+drive letter; online-only Drive files weren't looked at; open question
+4 can be answered in the opening document (Ernie has no Google Docs);
+Check on docs and spec shows changes from merged pull requests, for
+Ernie to accept; the register file D:\python\document-manager-register.db
+stays, now with 5 folders; why the mode switches after merges; the
+register file picker's button says "Save"; "Starts" in a summary
+includes headings (SM-3), Ernie to decide; the demo folder
+D:\python\demo-window stays until Ernie deletes it; old branches on
+GitHub, now also thread-10-log, big-folder-rules, big-folder-engine and
+big-folder-window; the old name "dhawel-22" saved in the GitHub tool;
+numbers in names sort character by character ("Report 10" before
+"Report 2"); the four questions of the reuse plan
+(docs/02-reuse-plan.md, section 7); a drill where the AI account tries
+to merge; rules 4 and 7 still only ask; the flashing check script
+window; tools from the opening document not set up yet (pre-commit,
+Pydantic/pandera, check-out/check-in scripts); why the PowerShell
+command swapped the file names and contents (thread 03); open questions
+2, 3, 5 and 6.
+Next: 12 · Phase 3: all network files. First, Ernie decides how big the
+first step is, and whether Stop should pick up where it left off; then
+Register and Check in the window, read-only, with every file's
+fingerprint checked before and after.

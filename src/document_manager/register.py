@@ -1,5 +1,6 @@
 """Register: the program's list of files (spec/register.md), read so that a
-busy folder doesn't stop a run (spec/busy-folders.md)."""
+busy folder doesn't stop a run (spec/busy-folders.md), and so that a long
+run picks up where it stopped (spec/long-runs.md)."""
 
 import os
 import sqlite3
@@ -7,8 +8,10 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import NamedTuple
 
 from document_manager.fingerprint import fingerprint_of
+from document_manager.progress import PickedUp, Progress
 
 # Each step brings a register file up one version: register.sql makes
 # version 1, register-2.sql adds the summaries (version 2), register-3.sql
@@ -28,8 +31,8 @@ CHANGED = "changed while it was read"  # BF-2
 
 # A counter is told how far a run has got (spec/window.md, WN-13): the files
 # found so far, with no total yet, then the files read out of the total.
-# The window's counter can stop the run, always before anything is saved
-# (WN-14). The commands pass no counter.
+# The window's counter can stop the run, always before anything is saved in
+# the register file (WN-14). The commands pass no counter.
 Counter = Callable[[int, int | None], None]
 
 
@@ -40,11 +43,20 @@ class Files:
 
     read: list[tuple[str, int, str]]  # each file's place, size and fingerprint
     unread: list[tuple[str, int | None, str]]  # place, size if Windows gave it, and why (BF-1)
+    picked_up: PickedUp | None = None  # how the run picked up after a stop (LR-4)
 
     @property
     def count(self) -> int:
         """Every file on the list, those that couldn't be read included."""
         return len(self.read) + len(self.unread)
+
+
+class Listed(NamedTuple):
+    """A file as the folder's listing gives it (LR-3)."""
+
+    path: Path
+    size: int | None  # None if the listing didn't give it
+    changed: int | None  # last-changed time, in nanoseconds
 
 
 class ChangedWhileRead(Exception):
@@ -68,10 +80,14 @@ def register_folder(folder: Path | str, register_file: Path | str,
     register_file = Path(register_file).resolve()
     if register_file.is_relative_to(folder):
         raise ValueError(f"The register file can't be inside {folder} (RG-4)")
+    progress = Progress(register_file, "register", folder)
+    if already_registered(register_file, folder):  # refused before any file is read (LR-7)
+        progress.remove()  # this folder's Register progress could never finish
+        raise ValueError(f"{folder} is already registered (RG-5)")
 
     # Read every file before saving anything, so a subfolder that can't be
     # read stops the whole run with nothing saved (RG-6, BF-5).
-    files = list_files(folder, counter)
+    files = list_files(folder, counter, progress)
 
     con = sqlite3.connect(register_file)
     try:
@@ -97,7 +113,20 @@ def register_folder(folder: Path | str, register_file: Path | str,
             )
     finally:
         con.close()
+    progress.remove()  # LR-5
     return files
+
+
+def already_registered(register_file: Path, folder: Path) -> bool:
+    """Whether the folder is in the register file, looked at read-only. A
+    register file that isn't there yet isn't made."""
+    if not register_file.exists():
+        return False
+    con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
+    try:
+        return is_registered(con, folder)
+    finally:
+        con.close()
 
 
 def is_registered(con: sqlite3.Connection, folder: Path) -> bool:
@@ -113,20 +142,52 @@ def is_registered(con: sqlite3.Connection, folder: Path) -> bool:
     ).fetchone() is not None
 
 
-def list_files(folder: Path, counter: Counter | None = None) -> Files:
+def list_files(folder: Path, counter: Counter | None = None,
+               progress: Progress | None = None) -> Files:
     """Every file's place in the folder, size and fingerprint (RG-1). A file
     that can't be read is listed with the reason instead (BF-1, BF-2), and
-    one that's gone when its turn comes is left out (BF-3)."""
+    one that's gone when its turn comes is left out (BF-3).
+
+    With progress, what's read is kept as the run goes, and when it stops
+    (LR-1, LR-2), and a file the run before this one read is kept from it,
+    not opened, if its size and last-changed time are the same (LR-3).
+    """
     files = Files(read=[], unread=[])
-    for path in counted(all_files(folder, counter), counter):
-        place = path.relative_to(folder).as_posix()
-        try:
-            files.read.append((place, *read_file(path)))
-        except ChangedWhileRead as changed:
-            files.unread.append((place, changed.size, CHANGED))
-        except OSError as error:
-            if not gone(folder, path):
-                files.unread.append((place, size_of(path), reason(error)))
+    listing = all_files(folder, counter)
+    stopped_at, earlier = progress.earlier() if progress else (None, {})
+    kept = read_again = 0
+    try:
+        for found in counted(listing, counter):
+            place = found.path.relative_to(folder).as_posix()
+            had = earlier.get(place)
+            if (had is not None and had.fingerprint is not None and found.changed is not None
+                    and (had.size, had.changed) == (found.size, found.changed)):
+                files.read.append((place, had.read_size, had.fingerprint))
+                kept += 1
+                continue
+            if had is not None:
+                read_again += 1
+            try:
+                size, fp = read_file(found.path)
+                why = None
+            except ChangedWhileRead as changed:
+                size, fp, why = changed.size, None, CHANGED
+            except OSError as error:
+                if gone(folder, found.path):
+                    continue
+                size, fp, why = size_of(found.path), None, reason(error)
+            if fp is None:
+                files.unread.append((place, size, why))
+            else:
+                files.read.append((place, size, fp))
+            if progress:
+                progress.add(place, found.size, found.changed, size, fp, why)
+    except BaseException:  # Stop, Ctrl+C or a problem: kept for the next run (LR-2)
+        if progress:
+            progress.keep()
+        raise
+    if stopped_at is not None:
+        files.picked_up = PickedUp(stopped_at, kept, read_again)
     return files
 
 
@@ -170,32 +231,53 @@ def size_of(path: Path) -> int | None:
         return None
 
 
-def all_files(folder: Path, counter: Counter | None = None) -> list[Path]:
-    """Every file in the folder and its subfolders. A subfolder that's gone
-    is passed over (BF-3); one that can't be read raises an error instead of
-    being skipped (RG-6, BF-5). The counter is told the files found so far,
-    after each folder."""
+def all_files(folder: Path, counter: Counter | None = None) -> list[Listed]:
+    """Every file in the folder and its subfolders, with the size and
+    last-changed time the folder's listing gives (LR-3). A subfolder that's
+    gone is passed over (BF-3); one that can't be read raises an error
+    instead of being skipped (RG-6, BF-5). The counter is told the files
+    found so far, after each folder.
 
-    def problem(error: OSError) -> None:
-        if error.filename is None or not gone(folder, error.filename):
-            raise error
-
+    Folders are listed in the same order os.walk lists them: each one before
+    its subfolders, and a link to a folder isn't followed.
+    """
     found = []
-    for root, _dirs, names in os.walk(folder, onerror=problem):
-        found.extend(Path(root, name) for name in names)
+    waiting = [folder]
+    while waiting:
+        current = waiting.pop()
+        here, subfolders = [], []
+        try:
+            with os.scandir(current) as entries:
+                for entry in entries:
+                    if entry.is_dir():
+                        if not entry.is_symlink():
+                            subfolders.append(Path(entry.path))
+                        continue
+                    try:
+                        info = entry.stat()  # from the listing: the file isn't opened
+                        size, changed = info.st_size, info.st_mtime_ns
+                    except OSError:  # a link to nothing: its reading says why (BF-1)
+                        size = changed = None
+                    here.append(Listed(Path(entry.path), size, changed))
+        except OSError:
+            if not gone(folder, current):
+                raise
+            continue
+        found += here
+        waiting += reversed(subfolders)
         if counter:
             counter(len(found), None)
     return sorted(found)
 
 
-def counted(paths: list[Path], counter: Counter | None) -> Iterator[Path]:
-    """The paths one at a time. The counter is told none read, then one more
+def counted(items: list, counter: Counter | None) -> Iterator:
+    """The items one at a time. The counter is told none read, then one more
     after each, so it's told about the last one before anything is saved."""
-    total = len(paths)
+    total = len(items)
     if counter:
         counter(0, total)
-    for done, path in enumerate(paths, start=1):
-        yield path
+    for done, item in enumerate(items, start=1):
+        yield item
         if counter:
             counter(done, total)
 

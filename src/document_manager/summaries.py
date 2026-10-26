@@ -102,8 +102,8 @@ def _summarize(folder: Path, latest: dict,
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     rows = []
     result = SummarizeResult(summarized=[], unchanged=0, could_not_read=[])
-    documents = [path for path in all_files(folder, counter)
-                 if path.suffix.lower() in WORD_FILES]
+    documents = [found.path for found in all_files(folder, counter)
+                 if found.path.suffix.lower() in WORD_FILES]
     for path in counted(documents, counter):
         place = path.relative_to(folder).as_posix()
         summary = None

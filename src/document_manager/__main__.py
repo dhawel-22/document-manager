@@ -1,5 +1,5 @@
 """Run the program (spec/report.md, spec/summaries.md, spec/window.md,
-spec/accept.md, spec/overview.md):
+spec/accept.md, spec/overview.md, spec/long-runs.md):
 
     python -m document_manager register <folder> <register file>
     python -m document_manager check <folder> <register file>
@@ -13,7 +13,8 @@ spec/accept.md, spec/overview.md):
 import sys
 
 from document_manager.commands import (
-    ACCEPT_QUESTION, COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run, run_overview,
+    ACCEPT_QUESTION, COMMANDS, NOTHING_SAVED, PICKS_UP, accept, changes_to_accept, run,
+    run_overview, stopped,
 )
 
 USAGE = ("Use: python -m document_manager register|check|summarize|summaries|accept"
@@ -38,7 +39,13 @@ def main(args: list[str]) -> int:
     command, folder, register_file = args
     if command == "accept":
         return accept_command(folder, register_file)
-    code, words = run(command, folder, register_file)
+    try:
+        code, words = run(command, folder, register_file)
+    except KeyboardInterrupt:  # Ctrl+C
+        if command not in PICKS_UP:
+            raise
+        print(f"{command.capitalize()} stopped. {stopped(command)}")  # spec/long-runs.md
+        return 1
     print(words)
     return code
 

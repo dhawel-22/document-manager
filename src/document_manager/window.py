@@ -29,7 +29,7 @@ from PySide6.QtWidgets import (
 )
 
 from document_manager.commands import (
-    COMMANDS, NOTHING_SAVED, accept, changes_to_accept, run, run_overview,
+    COMMANDS, NOTHING_SAVED, PICKS_UP, accept, changes_to_accept, run, run_overview, stopped,
 )
 from document_manager.register import Counter
 
@@ -205,8 +205,10 @@ class Window(QWidget):
         self.results.clear()  # Accept showed the changes while it asked
         finished = datetime.now().strftime("%H:%M")
         if isinstance(outcome, Stopped):  # WN-14
+            # Register and Check pick up from here next time (spec/long-runs.md)
+            then = stopped(command) if command in PICKS_UP else NOTHING_SAVED
             self.show_status(f"{command.capitalize()} stopped at {finished}"
-                             " (this computer's time). Nothing was saved.")
+                             f" (this computer's time). {then}")
             return
         if isinstance(outcome, Exception):  # an error the commands don't expect: shown, never hidden
             outcome = 1, f"Problem: {type(outcome).__name__}: {outcome}"

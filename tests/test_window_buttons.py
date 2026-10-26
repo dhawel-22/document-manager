@@ -1,6 +1,6 @@
 """Tests for the window's buttons, spec/window.md (WN-3 to WN-9, WN-11 to
-WN-15), the Accept button (spec/accept.md), and the Overview button
-(spec/overview.md, OV-13).
+WN-15), the Accept button (spec/accept.md), the Overview button
+(spec/overview.md, OV-13), and picking up after a stop (spec/long-runs.md).
 
 Some tests click the buttons on fake documents made for the tests. Others
 use a stand-in for run() or run_overview() (src/document_manager/commands.py),
@@ -34,8 +34,12 @@ from document_manager.window import (
 FOLDER, REGISTER = r"D:\fake\docs", r"D:\fake\register.db"
 FINISHED = re.compile(r"(Register|Check|Summarize|Summaries|Accept|Overview) finished on .+"
                       r" at \d\d:\d\d \(this computer's time\)\.")
-STOPPED = re.compile(r"(Register|Check|Summarize|Summaries|Accept) stopped at \d\d:\d\d"
+STOPPED = re.compile(r"(Summarize|Summaries|Accept) stopped at \d\d:\d\d"
                      r" \(this computer's time\)\. Nothing was saved\.")
+# Register and Check pick up where they stopped (spec/long-runs.md).
+PICKS_UP = re.compile(r"(Register|Check) stopped at \d\d:\d\d \(this computer's time\)\."
+                      r" The register file wasn't changed; the next \1 on this folder"
+                      r" picks up from here\.")
 HOLD = 5  # seconds
 WAIT = 10_000  # milliseconds
 # The engine's steps that read each file: for Register, Check and Accept,
@@ -471,7 +475,7 @@ def test_wn14_stop_stops_the_work_and_nothing_is_saved(qtbot, monkeypatch):
     assert not window.stop_button.isEnabled()
     go_on.set()
     wait_for_work(qtbot, window)
-    assert STOPPED.fullmatch(window.status.text())
+    assert PICKS_UP.fullmatch(window.status.text())
     assert window.status.text().startswith("Check stopped at ")
     assert RED not in window.status.styleSheet()
     assert window.results.toPlainText() == ""
@@ -500,8 +504,22 @@ def test_wn14_a_stopped_register_makes_no_register_file(qtbot, tmp_path, monkeyp
     reg = tmp_path / "register.db"
     window = make_window(qtbot, docs, reg)
     stop_while_reading(qtbot, monkeypatch, window, "register", REGISTER_READS)
+    assert PICKS_UP.fullmatch(window.status.text())
     assert window.status.text().startswith("Register stopped at ")
     assert not reg.exists()
+
+
+def test_a_stopped_register_picks_up_when_pressed_again(qtbot, tmp_path, monkeypatch):
+    """spec/long-runs.md, LR-3 and LR-4, in the window."""
+    docs = fake_docs(tmp_path)
+    window = make_window(qtbot, docs, tmp_path / "register.db")
+    stop_while_reading(qtbot, monkeypatch, window, "register", REGISTER_READS)
+    press(qtbot, window, "register")
+    first, rest = window.results.toPlainText().split("\n", 1)
+    assert re.fullmatch(r"Picked up the run that stopped at \d{4}-\d\d-\d\d \d\d:\d\d UTC:"
+                        r" 1 file kept, 0 read again\.", first)
+    assert rest == f"Registered {docs}. Files listed: 3."
+    assert FINISHED.fullmatch(window.status.text())
 
 
 def test_wn14_a_stopped_summarize_saves_nothing(qtbot, tmp_path, monkeypatch):
@@ -511,6 +529,7 @@ def test_wn14_a_stopped_summarize_saves_nothing(qtbot, tmp_path, monkeypatch):
     press(qtbot, window, "register")
     before = reg.read_bytes()
     stop_while_reading(qtbot, monkeypatch, window, "summarize", SUMMARIZE_READS)
+    assert STOPPED.fullmatch(window.status.text())  # Summarize doesn't pick up (LR-8)
     assert window.status.text().startswith("Summarize stopped at ")
     assert reg.read_bytes() == before
 
@@ -522,6 +541,7 @@ def test_wn14_a_stopped_accept_saves_nothing(qtbot, tmp_path, monkeypatch):
     # Accept's first reading, before the question, reads the three files.
     # Its second reading, after Yes, is the one held and stopped.
     stop_while_reading(qtbot, monkeypatch, window, "accept", REGISTER_READS, after=3)
+    assert STOPPED.fullmatch(window.status.text())  # Accept doesn't pick up (LR-8)
     assert window.status.text().startswith("Accept stopped at ")
     assert window.results.toPlainText() == ""
     assert reg.read_bytes() == before

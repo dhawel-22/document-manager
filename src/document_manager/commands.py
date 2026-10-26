@@ -1,5 +1,5 @@
 """The commands' words, made in one place (spec/report.md, spec/summaries.md,
-spec/accept.md, spec/overview.md, spec/busy-folders.md).
+spec/accept.md, spec/overview.md, spec/busy-folders.md, spec/long-runs.md).
 
 The commands print these words and the window shows them, so both always
 say exactly the same (spec/window.md, WN-3, WN-4).
@@ -11,12 +11,14 @@ from document_manager.accept import accept_folder
 from document_manager.check import CheckResult, check_folder
 from document_manager.overview import overview
 from document_manager.overview_report import overview_report
+from document_manager.progress import PickedUp
 from document_manager.register import Counter, Files, register_folder
 from document_manager.report import report
 from document_manager.summaries import saved_summaries, summarize_folder
 from document_manager.summary_report import summaries_report, summarize_report
 
 COMMANDS = ("register", "check", "summarize", "summaries")
+PICKS_UP = ("register", "check")  # the runs that pick up after a stop (LR-8)
 PROBLEMS = (OSError, ValueError, sqlite3.Error)
 ACCEPT_QUESTION = "Accept these changes? Type yes to accept: "
 NOTHING_SAVED = "Nothing was saved."
@@ -31,9 +33,10 @@ def run(command: str, folder: str, register_file: str,
     try:
         if command == "register":
             files = register_folder(folder, register_file, counter)
-            return 0, listed("Registered", folder, files)  # RP-1
+            return 0, picked_up(files.picked_up) + listed("Registered", folder, files)  # RP-1
         if command == "check":
-            return 0, report(check_folder(folder, register_file, counter))  # RP-2, RP-3
+            found = check_folder(folder, register_file, counter)
+            return 0, picked_up(found.picked_up) + report(found)  # RP-2, RP-3
         if command == "summarize":
             return 0, summarize_report(summarize_folder(folder, register_file, counter))
         if command == "summaries":
@@ -58,7 +61,7 @@ def changes_to_accept(folder: str, register_file: str,
     """What accepting would take, in the check's words (AC-1). The result is
     None when there is nothing to accept (AC-6) or a problem (RP-4)."""
     try:
-        found = check_folder(folder, register_file, counter)
+        found = check_folder(folder, register_file, counter, pick_up=False)  # LR-8
     except PROBLEMS as error:
         return 1, f"Problem: {error}", None
     if not (found.changed or found.new or found.missing):
@@ -87,3 +90,20 @@ def listed(done: str, folder: str, files: Files) -> str:
     lines += [f"  couldn't read  {place}  {why}"
               for place, why in sorted((place, why) for place, _size, why in files.unread)]
     return "\n".join(lines)
+
+
+def picked_up(picked: PickedUp | None) -> str:
+    """The line before a run's words when it picked up where the run before
+    it stopped (LR-4); nothing when it didn't."""
+    if picked is None:
+        return ""
+    at = f"{picked.stopped_at[:10]} {picked.stopped_at[11:16]} UTC"
+    kept = f"{picked.kept} file{'' if picked.kept == 1 else 's'} kept"
+    return f"Picked up the run that stopped at {at}: {kept}, {picked.read_again} read again.\n"
+
+
+def stopped(command: str) -> str:
+    """What's said when Register or Check stops before it finishes
+    (spec/long-runs.md, Details)."""
+    return (f"The register file wasn't changed; the next {command.capitalize()}"
+            " on this folder picks up from here.")

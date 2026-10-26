@@ -5,6 +5,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from document_manager.progress import PickedUp, Progress
 from document_manager.register import VERSION, Counter, Files, list_files
 
 
@@ -17,16 +18,28 @@ class CheckResult:
     missing: list[str]  # CK-3
     unchanged: int  # CK-1
     could_not_read: list[tuple[str, str]] = field(default_factory=list)  # (place, reason) (BF-7)
+    picked_up: PickedUp | None = None  # how the check picked up after a stop (LR-4)
 
 
 def check_folder(folder: Path | str, register_file: Path | str,
-                 counter: Counter | None = None) -> CheckResult:
-    """Compare the folder's files now with its list in the register (CK-1)."""
+                 counter: Counter | None = None, pick_up: bool = True) -> CheckResult:
+    """Compare the folder's files now with its list in the register (CK-1).
+
+    A check keeps its progress and picks up after a stop (spec/long-runs.md),
+    except the reading Accept does first, which doesn't (LR-8).
+    """
     folder = Path(folder).resolve(strict=True)
     if not folder.is_dir():
         raise NotADirectoryError(f"Not a folder: {folder}")
-    listed = listed_files(folder, Path(register_file).resolve(strict=True))
-    return compare_files(listed, list_files(folder, counter))
+    register_file = Path(register_file).resolve(strict=True)
+    listed = listed_files(folder, register_file)
+    progress = Progress(register_file, "check", folder) if pick_up else None
+    files = list_files(folder, counter, progress)
+    found = compare_files(listed, files)
+    found.picked_up = files.picked_up
+    if progress:
+        progress.remove()  # LR-5
+    return found
 
 
 def compare_files(listed: dict[str, str | None], files: Files) -> CheckResult:

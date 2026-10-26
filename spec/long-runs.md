@@ -1,8 +1,10 @@
 # Long runs
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "14 · Discovery: runs that don't fail"
+**Changes:** v1.1 (2026-10-26): a progress file chosen as the register file
+is refused (RG-7). Made through a pull request.
 
 On a big folder, Register and Check take hours: all of T: would take about
 10 hours each (thread 12). Until now, a run that stopped for any reason
@@ -49,6 +51,8 @@ On trust (technical):
 Details:
 - The progress file is next to the register file, with ".progress" added
   to its name, like document-manager-register.db.progress.
+- A progress file chosen as the register file, in the window or typed, is
+  refused, with the register file to choose instead (RG-7, v1.1).
 - A run picks up only from its own kind: a Check doesn't pick up a stopped
   Register's progress, or the other way round.
 - A file whose size and last-changed time stay the same while its bytes

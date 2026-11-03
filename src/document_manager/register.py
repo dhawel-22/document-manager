@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 from document_manager.fingerprint import fingerprint_of
-from document_manager.progress import PickedUp, Progress
+from document_manager.progress import SUFFIX, PickedUp, Progress
 
 # Each step brings a register file up one version: register.sql makes
 # version 1, register-2.sql adds the summaries (version 2), register-3.sql
@@ -22,6 +22,9 @@ STEPS = [
     for name in ("register.sql", "register-2.sql", "register-3.sql", "register-4.sql")
 ]
 VERSION = len(STEPS)
+# The tables each step makes, so that a register file of any version can be
+# told from every other file (RG-7).
+STEP_TABLES = [{"folder", "file"}, {"summary"}, {"accepted", "accepted_file"}, {"unread"}]
 
 # Why a file couldn't be read, in plain words (spec/busy-folders.md, Details).
 # Windows gives Python the same answer for a file in use and for one with no
@@ -119,14 +122,44 @@ def register_folder(folder: Path | str, register_file: Path | str,
 
 def already_registered(register_file: Path, folder: Path) -> bool:
     """Whether the folder is in the register file, looked at read-only. A
-    register file that isn't there yet isn't made."""
+    file that isn't a register file is refused first (RG-7); a register file
+    that isn't there yet isn't made."""
     if not register_file.exists():
         return False
     con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
     try:
+        check_register_file(con, register_file, new=True)
         return is_registered(con, folder)
     finally:
         con.close()
+
+
+def check_register_file(con: sqlite3.Connection, register_file: Path,
+                        new: bool = False) -> int:
+    """The register file's version, once its tables show it's a register
+    file (RG-7). With new, an empty file passes too, as Register makes it
+    into one (RG-2). Any other file is refused, before anything in it is
+    changed."""
+    try:
+        version = con.execute("PRAGMA user_version").fetchone()[0]
+        tables = {name for (name,) in con.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table'")}
+    except sqlite3.DatabaseError as error:  # not an SQLite file at all
+        raise ValueError(f"{register_file} isn't a register file (RG-7)") from error
+    if version > VERSION:
+        raise ValueError(f"Unknown register file version: {version}")
+    if version == 0 and not tables and new:
+        return version
+    if version >= 1 and set().union(*STEP_TABLES[:version]) <= tables:
+        return version
+    if "run" in tables and "folder" not in tables:  # a long run's progress file
+        name = register_file.name
+        while name.endswith(SUFFIX):
+            name = name.removesuffix(SUFFIX)
+        instead = f" Choose {register_file.with_name(name)} instead." if name else ""
+        raise ValueError(f"{register_file} is a progress file, not a register file"
+                         f" (RG-7).{instead}")
+    raise ValueError(f"{register_file} isn't a register file (RG-7)")
 
 
 def is_registered(con: sqlite3.Connection, folder: Path) -> bool:
@@ -284,9 +317,9 @@ def counted(items: list, counter: Counter | None) -> Iterator:
 
 def prepare_register(con: sqlite3.Connection) -> None:
     """Create the tables in a new register file, or bring an older one up to
-    the current version, one step at a time."""
-    version = con.execute("PRAGMA user_version").fetchone()[0]
-    if version > VERSION:
-        raise ValueError(f"Unknown register file version: {version}")
+    the current version, one step at a time. A file that isn't a register
+    file is never changed (RG-7)."""
+    [(_, _, path)] = con.execute("PRAGMA database_list").fetchall()
+    version = check_register_file(con, Path(path), new=True)
     for step in STEPS[version:]:
         con.executescript(step.read_text(encoding="utf-8"))

@@ -13,7 +13,7 @@ from pathlib import Path
 
 from document_manager.fingerprint import fingerprint
 from document_manager.register import (
-    VERSION, Counter, all_files, counted, gone, prepare_register,
+    Counter, all_files, check_register_file, counted, gone, prepare_register,
 )
 from document_manager.word import CouldNotRead, Summary, summarize_document
 
@@ -40,7 +40,7 @@ def summarize_folder(folder: Path | str, register_file: Path | str,
     register_file = Path(register_file).resolve(strict=True)  # never made here
     con = sqlite3.connect(register_file)
     try:
-        folder_id = _registered(con, folder)  # SM-7, before any change
+        folder_id = _registered(con, folder, register_file)  # RG-7, SM-7, before any change
         latest = _latest(con, folder_id)
         # Every document is read before anything is saved, and an older
         # register file is brought up to date only then (v1.5).
@@ -58,14 +58,11 @@ def summarize_folder(folder: Path | str, register_file: Path | str,
     return result
 
 
-def _registered(con: sqlite3.Connection, folder: Path) -> int:
-    """The folder's id in the register file; an unregistered folder is refused (SM-7)."""
-    version = con.execute("PRAGMA user_version").fetchone()[0]
-    if version > VERSION:
-        raise ValueError(f"Unknown register file version: {version}")
-    row = None
-    if version >= 1:
-        row = con.execute("SELECT id FROM folder WHERE path = ?", (str(folder),)).fetchone()
+def _registered(con: sqlite3.Connection, folder: Path, register_file: Path) -> int:
+    """The folder's id in the register file. A file that isn't a register
+    file is refused (RG-7), and so is an unregistered folder (SM-7)."""
+    check_register_file(con, register_file)
+    row = con.execute("SELECT id FROM folder WHERE path = ?", (str(folder),)).fetchone()
     if row is None:
         raise ValueError(f"{folder} is not in the register file (SM-7)")
     return row[0]
@@ -171,7 +168,7 @@ def saved_summaries(folder: Path | str, register_file: Path | str) -> list[Saved
     register_file = Path(register_file).resolve(strict=True)
     con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
     try:
-        folder_id = _registered(con, folder)
+        folder_id = _registered(con, folder, register_file)
         if not _has_summaries(con):  # a version 1 register file: nothing summarized yet
             return []
         rows = con.execute(

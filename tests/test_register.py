@@ -1,14 +1,21 @@
-"""Tests for the register rules in spec/register.md (RG-1 to RG-6)."""
+"""Tests for the register rules in spec/register.md (RG-1 to RG-7)."""
 
 import os
+import re
+import shutil
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
+from document_manager.commands import changes_to_accept, run, run_overview
 from document_manager.fingerprint import fingerprint
-from document_manager.register import register_folder
+from document_manager.progress import Progress
+from document_manager.register import STEP_TABLES, STEPS, prepare_register, register_folder
+
+# Every command that's given a register file (RG-7).
+EVERY_COMMAND = ["register", "check", "summarize", "summaries", "accept", "overview"]
 
 
 def make_docs(tmp_path):
@@ -114,3 +121,118 @@ def test_rg6_missing_folder_saves_nothing(tmp_path):
     with pytest.raises(FileNotFoundError):
         register_folder(tmp_path / "not-there", reg)
     assert not reg.exists()
+
+
+def progress_file(tmp_path, docs):
+    """A real progress file, like the one a stopped Register leaves next to
+    its register file, register.db (spec/long-runs.md)."""
+    progress = Progress(tmp_path / "register.db", "register", docs.resolve())
+    note = docs / "letters" / "note.txt"
+    progress.add("letters/note.txt", note.stat().st_size, note.stat().st_mtime_ns, 6,
+                 fingerprint(note), None)
+    progress.keep()
+    return progress.path
+
+
+def given(command, docs, register_file):
+    """Run one command with this register file, as the window does. Also
+    gives back what the counter was told: anything means the folder was
+    read."""
+    told = []
+
+    def counter(done, total):
+        told.append((done, total))
+
+    if command == "overview":
+        code, words = run_overview(str(register_file))
+    elif command == "accept":
+        code, words, _ = changes_to_accept(str(docs), str(register_file), counter)
+    else:
+        code, words = run(command, str(docs), str(register_file), counter)
+    return code, words, told
+
+
+@pytest.mark.parametrize("command", EVERY_COMMAND)
+def test_rg7_every_command_refuses_a_progress_file(tmp_path, command):
+    docs = make_docs(tmp_path)
+    progress = progress_file(tmp_path, docs)
+    before = progress.read_bytes()
+    assert given(command, docs, progress) == (
+        1, f"Problem: {progress.resolve()} is a progress file, not a register file (RG-7)."
+           f" Choose {(tmp_path / 'register.db').resolve()} instead.", [])
+    assert progress.read_bytes() == before
+
+
+def test_rg7_the_progress_file_changed_in_the_try_out_is_refused_too(tmp_path):
+    docs = make_docs(tmp_path)
+    progress = progress_file(tmp_path, docs)
+    con = sqlite3.connect(progress)
+    for step in STEPS[1:]:  # what happened to it in thread 14's try-out
+        con.executescript(step.read_text(encoding="utf-8"))
+    con.close()
+    before = progress.read_bytes()
+    code, words = run("register", str(docs), str(progress))
+    assert code == 1
+    assert words.startswith(f"Problem: {progress.resolve()} is a progress file")
+    assert progress.read_bytes() == before
+
+
+def test_rg7_the_register_file_to_choose_has_every_progress_ending_taken_off(tmp_path):
+    docs = make_docs(tmp_path)
+    twice = tmp_path / "register.db.progress.progress"  # as the try-out made one
+    shutil.copy(progress_file(tmp_path, docs), twice)
+    code, words = run("check", str(docs), str(twice))
+    assert words.endswith(f" Choose {(tmp_path / 'register.db').resolve()} instead.")
+
+
+@pytest.mark.parametrize("command", EVERY_COMMAND)
+def test_rg7_a_file_that_isnt_sqlite_is_refused(tmp_path, command):
+    docs = make_docs(tmp_path)
+    letter = tmp_path / "letter.docx"
+    letter.write_bytes(b"a fake letter, not a register file\n" * 10)
+    assert given(command, docs, letter) == (
+        1, f"Problem: {letter.resolve()} isn't a register file (RG-7)", [])
+    assert letter.read_bytes() == b"a fake letter, not a register file\n" * 10
+
+
+@pytest.mark.parametrize("command", EVERY_COMMAND)
+def test_rg7_another_programs_database_is_refused(tmp_path, command):
+    docs = make_docs(tmp_path)
+    contacts = tmp_path / "contacts.db"
+    con = sqlite3.connect(contacts)
+    con.execute("CREATE TABLE contact (name TEXT)")
+    con.commit()
+    con.close()
+    before = contacts.read_bytes()
+    assert given(command, docs, contacts) == (
+        1, f"Problem: {contacts.resolve()} isn't a register file (RG-7)", [])
+    assert contacts.read_bytes() == before  # no register tables were added to it
+
+
+def test_rg7_an_empty_file_is_made_into_a_register_file_by_register(tmp_path):
+    docs = make_docs(tmp_path)
+    empty = tmp_path / "register.db"
+    empty.write_bytes(b"")
+    assert run("check", str(docs), str(empty)) == (
+        1, f"Problem: {empty.resolve()} isn't a register file (RG-7)")
+    assert empty.read_bytes() == b""
+    assert run("register", str(docs), str(empty))[0] == 0
+    assert query(empty, "PRAGMA user_version") == [(4,)]
+
+
+def test_rg7_bringing_a_file_up_to_date_never_changes_one_that_isnt_a_register_file(tmp_path):
+    """The last safety net: the step every saving command takes first."""
+    progress = progress_file(tmp_path, make_docs(tmp_path))
+    before = progress.read_bytes()
+    con = sqlite3.connect(progress)
+    try:
+        with pytest.raises(ValueError, match=r"is a progress file, not a register file \(RG-7\)"):
+            prepare_register(con)
+    finally:
+        con.close()
+    assert progress.read_bytes() == before
+
+
+def test_rg7_each_steps_tables_are_the_ones_its_script_makes():
+    for step, tables in zip(STEPS, STEP_TABLES, strict=True):
+        assert set(re.findall(r"CREATE TABLE (\w+)", step.read_text(encoding="utf-8"))) == tables

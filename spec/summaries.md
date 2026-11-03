@@ -1,6 +1,6 @@
 # Summaries
 
-**Version:** 1.6 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.7 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "04 · Finish Phase 0"
 **Changes:** v1.1 (2026-10-23): details for SM-3 and SM-6, below. Made
@@ -14,6 +14,8 @@ v1.5 (2026-10-24): an older register file is brought up to date only
 when summaries are saved. Made through a pull request.
 v1.6 (2026-10-25): busy folders (spec/busy-folders.md). Made through a
 pull request.
+v1.7 (2026-11-03): Stage B runs on this computer (D-024), with its rules
+in spec/ai-summaries.md. Made through a pull request.
 
 The summaries feature finds the Word documents in a registered folder,
 reads them, and saves each one's location and summary in the register file
@@ -21,8 +23,8 @@ reads them, and saves each one's location and summary in the register file
 
 Stage A (these rules): find, read and store, all on this computer. Nothing
 leaves the computer.
-Stage B (later, only with Ernie's yes): real summaries written by Claude.
-Each document's text would be sent to Anthropic.
+Stage B: AI summaries, written by a model on this computer (D-024). Its
+rules are in spec/ai-summaries.md. Nothing leaves the computer.
 
 | ID | Rule |
 |---|---|
@@ -34,7 +36,7 @@ Each document's text would be sent to Anthropic.
 | SM-6 | Old Word files (`.doc`), protected files, and files that can't be opened are listed as "couldn't read", with the reason. Nothing is guessed for them. |
 | SM-7 | A folder that isn't in the register file is refused. |
 | SM-8 | A command shows the results: each document's place and summary, plus the "couldn't read" list. |
-| SM-9 | Stage B, AI summaries, is off until Ernie decides to turn it on. Until then, no document text leaves this computer. |
+| SM-9 | Stage B, AI summaries, follows spec/ai-summaries.md. No document text leaves this computer. |
 
 How it's proven:
 - A test for every rule, on fake Word documents made for the tests. That

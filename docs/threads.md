@@ -928,3 +928,112 @@ Next: 16 · AI summaries on this computer. First, what it takes, for
 Ernie's decision: a local AI program such as Ollama and one model,
 with their sizes and versions; then Stage B's rules in spec/ (SM-9),
 for his approval; then a try-out on Word documents already registered.
+
+## 16 · AI summaries on this computer (2026-11-03)
+Purpose: what AI summaries on this computer take, then Stage B's rules,
+the code, and a try-out on Word documents already registered.
+Decided: LM Studio, already running here with its models, instead of
+Ollama, and the model Qwen3.8 27B (Ernie); the Stage B rules,
+spec/ai-summaries.md, AI-1 to AI-10 (Ernie, #93); AI-6 lowered from
+4,000 to 3,000 words, and AI-11, after a measurement (Ernie, #94); a
+folder is found whatever capitals its name is written with, RG-8
+(Ernie, #95), fixed before the try-out (Ernie); the try-out's summaries
+are good enough (Ernie); the code's details, among them register file
+version 5, temperature 0 and a stand-in for LM Studio in the tests (On
+trust).
+Done:
+- What it takes, look only: this computer has 64 GB of memory and an
+  Intel Arc B580 graphics card. Ollama 0.40.13 was installed with no
+  models; LM Studio was running, with 10 models (171.6 GB).
+- Two models on a fake memo: Qwen3.8 27B was fully accurate in 147
+  seconds; Qwen2.5 7B took 23 seconds, with one stretch and one missed
+  point.
+- The Stage B rules (#93).
+- A measurement while drafting: a fake 4,096-word report took 7,267 of
+  the model's 8,192 tokens, and its answer was cut off mid-sentence;
+  LM Studio refused a 6,000-word one as too big. Of the 133 registered
+  Word documents with a Stage A summary, 20 are over 3,000 words.
+- The code and two typed commands, ai-summarize and ai-summaries (#94):
+  each summary is saved as soon as it's made, only 127.0.0.1 is asked,
+  and the register file becomes version 5 at the first save. 55 new
+  tests; 37 breaks on purpose were each caught. A try-out on fake
+  documents with the real LM Studio: 2 made in 5½ minutes, a
+  3,200-word one too long, an unchanged second run skipped in 0.4
+  seconds, and every document the same before and after.
+- The first try-out on real documents, Classes on T:, was refused before
+  anything was read: Windows now gives the network drive's name as
+  MyCloudEX2Ultra, but 39 folders were saved as MYCLOUDEX2ULTRA, and
+  every command looked names up letter for letter.
+- The capitals fix (#95): every command finds those 39 folders again,
+  and Register can't save one twice. 9 new tests; 8 breaks on purpose
+  were each caught. All 334 tests pass on GitHub.
+- The Classes try-out again, typed as T:\Classes: 2 AI summaries made in
+  5½ minutes; 39 couldn't be read (38 old .doc files, and one .docx
+  with a damaged picture inside). All 138 files were the same before and
+  after. The register file went from version 3 to 5, its older content
+  unchanged row for row; the copy from before is
+  D:\python\document-manager-register-before-ai.db.
+Lessons:
+- At the start, thinking was "medium"; Ernie switched it to "max" during
+  the thread.
+- Claude found Ollama but missed LM Studio, which already had the
+  models; Ernie pointed it out. Look for every program that can do the
+  job before proposing a download.
+- A number written On trust into a rule was wrong: v1.0 said 4,000 words
+  would fit, and they didn't. Measure before a number goes into a rule.
+- The try-out found what the tests couldn't: tests use folders on this
+  computer, where Windows always gives a folder's real capitals.
+- Claude's first line-ending check was written wrongly and flagged all
+  17 files; counting the bytes showed none. Check a surprising result
+  before reporting it.
+- The guard asks before Python only when Python is in the command
+  itself; Python started from inside a script file ran without a
+  question (Ernie noticed no box).
+- The app restarted once while a question box was open, and Ernie had
+  to ask what to do. The draft was kept, and the run was asked again.
+- The mode stayed Manual after all three merges (#93 to #95).
+Open: the window button for AI summaries; AI summaries for every
+folder: about 440 registered Word documents, at about 3 minutes each,
+so about a day of running in all, in overnight runs; a search of the
+summaries and names; documents over 3,000 words (20 of the 133
+measured) could fit if LM Studio loads the model with a bigger reading
+space, after a measurement; old .doc files can't be read (38 in
+Classes alone), nor PDFs; SLIM/Slim tools/Proprietary Indicators.docx
+in Classes has a damaged picture inside; the guards don't ask about
+Python started from a script file; a long run's progress file still
+matches names letter for letter (spec/register.md, Details v1.5); the
+register file D:\python\document-manager-register.db is now at version
+5, with 2 AI summaries, and its copy from before stays until Ernie
+deletes it; Ollama is installed but unused; "Starts" in a summary
+includes headings (SM-3), Ernie to decide; Google Drive only if it
+proves worth it, which would change D-023; a folder inside another
+registered folder is counted twice by the overview, each of its files
+as a duplicate of itself (read in the code); the test folder
+G:\My Drive\Document manager test stays in the register file as a
+record; discovery's leftovers, only if a reason comes up: what changes
+and how often (question 4), T:'s backup folder and 2 loose files, Y:,
+and how much keeping progress slows a run on T:; the overview's dates
+are in UTC while the window's status line uses this computer's time;
+the duplicates fill most of the overview (2,690 of 2,838 lines on the
+real register file); the register saves a network folder under its
+network address, not its drive letter; Check on docs and spec shows
+changes from merged pull requests, for Ernie to accept; why the mode
+switches after merges; the register file picker's button says "Save";
+the demo folders D:\python\demo-window, demo-busy and demo-long
+(200,000 fake files), the register file demo-busy-register.db and the
+try-out's two progress files, demo-long-register.db.progress and
+demo-long-register.db.progress.progress, stay until Ernie deletes them;
+old branches on GitHub, now also thread-15-log, ai-summaries-rules,
+ai-summaries-code and register-capitals; the old name "dhawel-22" saved
+in the GitHub tool; numbers in names sort character by character
+("Report 10" before "Report 2"); the four questions of the reuse plan
+(docs/02-reuse-plan.md, section 7); a drill where the AI account tries
+to merge; rules 4 and 7 still only ask; the flashing check script
+window; tools from the opening document not set up yet (pre-commit,
+Pydantic/pandera, check-out/check-in scripts); why the PowerShell
+command swapped the file names and contents (thread 03); open questions
+2, 3 and 5.
+Next: 17 · AI summaries for every folder. First, the window button for
+AI summaries, with its rules in spec/ first; then overnight runs on the
+registered folders, read-only; then a search of the summaries and
+names.

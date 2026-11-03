@@ -300,7 +300,8 @@ def test_ov11_a_register_file_with_no_folders(tmp_path):
 def test_older_register_files_are_read_as_they_are(tmp_path):
     _, _, reg = registered(tmp_path)
     expected = overview(reg)
-    for older in ("DROP TABLE unread; PRAGMA user_version = 3;",
+    for older in ("DROP TABLE ai_summary; PRAGMA user_version = 4;",
+                  "DROP TABLE unread; PRAGMA user_version = 3;",
                   "DROP TABLE accepted_file; DROP TABLE accepted; PRAGMA user_version = 2;",
                   "DROP TABLE summary; PRAGMA user_version = 1;"):
         con = sqlite3.connect(reg)

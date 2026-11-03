@@ -1,4 +1,5 @@
-"""Tests for one document's summary, spec/summaries.md v1.1 (SM-3, SM-5, SM-6).
+"""Tests for one document's summary, spec/summaries.md v1.1 (SM-3, SM-5, SM-6),
+and its text for an AI summary, spec/ai-summaries.md (AI-3).
 
 Every Word document here is a fake, made by the test in a temporary folder.
 """
@@ -9,7 +10,7 @@ import zipfile
 import docx
 import pytest
 
-from document_manager.word import CouldNotRead, Summary, summarize_document
+from document_manager.word import CouldNotRead, Summary, document_text, summarize_document
 
 OLD_FORMAT = bytes.fromhex("D0CF11E0A1B11AE1") + bytes(504)
 
@@ -149,3 +150,44 @@ def test_sm6_broken_file_gives_the_error_word_for_word(tmp_path):
 def test_sm6_missing_file(tmp_path):
     with pytest.raises(CouldNotRead, match="FileNotFoundError"):
         summarize_document(tmp_path / "gone.docx")
+
+
+def test_ai3_text_is_read_the_same_way_as_for_stage_a(tmp_path):
+    made = docx.Document()
+    made.core_properties.title = "Saved title"  # not part of the text
+    made.add_heading("Summary", level=1)
+    made.add_paragraph("Before.")
+    table = made.add_table(rows=2, cols=2)
+    table.cell(0, 0).merge(table.cell(0, 1)).text = "Merged header"
+    table.cell(1, 0).text = "A"
+    table.cell(1, 1).text = "B"
+    made.add_paragraph("After.")
+    path = tmp_path / "table.docx"
+    made.save(path)
+    text = document_text(path)
+    assert text == "Summary\nBefore.\nMerged header\nA\nB\nAfter."
+    assert len(text.split()) == summarize_document(path).word_count == 7
+
+
+def test_ai3_text_of_an_empty_document(tmp_path):
+    assert document_text(fake_docx(tmp_path / "empty.docx", title="")) == ""
+
+
+@pytest.mark.parametrize("name, content, reason", [
+    ("old.doc", OLD_FORMAT, r"old Word file \(\.doc\)"),
+    ("secret.docx", OLD_FORMAT, "protected with a password"),
+    ("~$report.docx", b"\x05Ernie" + bytes(150), "lock file"),
+    ("broken.docx", b"this is not a Word document", "PackageNotFoundError"),
+])
+def test_ai3_text_couldnt_read_gives_the_same_reasons(tmp_path, name, content, reason):
+    path = tmp_path / name
+    path.write_bytes(content)
+    with pytest.raises(CouldNotRead, match=reason):
+        document_text(path)
+
+
+def test_ai10_reading_the_text_only_reads(tmp_path):
+    path = fake_docx(tmp_path / "report.docx", title="Weekly report", blocks=[("p", "Text.")])
+    before = (path.read_bytes(), path.stat().st_mtime_ns)
+    document_text(path)
+    assert (path.read_bytes(), path.stat().st_mtime_ns) == before

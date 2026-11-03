@@ -1,11 +1,13 @@
 """Run the program (spec/report.md, spec/summaries.md, spec/window.md,
-spec/accept.md, spec/overview.md, spec/long-runs.md):
+spec/accept.md, spec/overview.md, spec/long-runs.md, spec/ai-summaries.md):
 
     python -m document_manager register <folder> <register file>
     python -m document_manager check <folder> <register file>
     python -m document_manager summarize <folder> <register file>
     python -m document_manager summaries <folder> <register file>
     python -m document_manager accept <folder> <register file>
+    python -m document_manager ai-summarize <folder> <register file>
+    python -m document_manager ai-summaries <folder> <register file>
     python -m document_manager overview <register file>
     python -m document_manager window
 """
@@ -13,11 +15,12 @@ spec/accept.md, spec/overview.md, spec/long-runs.md):
 import sys
 
 from document_manager.commands import (
-    ACCEPT_QUESTION, COMMANDS, NOTHING_SAVED, PICKS_UP, accept, changes_to_accept, run,
-    run_overview, stopped,
+    ACCEPT_QUESTION, AI_COMMANDS, AI_STOPPED, COMMANDS, NOTHING_SAVED, PICKS_UP, accept,
+    changes_to_accept, run, run_overview, stopped,
 )
 
-USAGE = ("Use: python -m document_manager register|check|summarize|summaries|accept"
+USAGE = ("Use: python -m document_manager"
+         " register|check|summarize|summaries|accept|ai-summarize|ai-summaries"
          " <folder> <register file>, or: python -m document_manager overview <register file>,"
          " or: python -m document_manager window")
 
@@ -33,7 +36,7 @@ def main(args: list[str]) -> int:
         code, words = run_overview(args[1])  # OV-12
         print(words)
         return code
-    if len(args) != 3 or args[0] not in (*COMMANDS, "accept"):
+    if len(args) != 3 or args[0] not in (*COMMANDS, "accept", *AI_COMMANDS):
         print(USAGE)
         return 2
     command, folder, register_file = args
@@ -42,6 +45,9 @@ def main(args: list[str]) -> int:
     try:
         code, words = run(command, folder, register_file)
     except KeyboardInterrupt:  # Ctrl+C
+        if command == "ai-summarize":
+            print(AI_STOPPED)  # AI-7
+            return 1
         if command not in PICKS_UP:
             raise
         print(f"{command.capitalize()} stopped. {stopped(command)}")  # spec/long-runs.md

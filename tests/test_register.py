@@ -15,7 +15,8 @@ from document_manager.progress import Progress
 from document_manager.register import STEP_TABLES, STEPS, prepare_register, register_folder
 
 # Every command that's given a register file (RG-7).
-EVERY_COMMAND = ["register", "check", "summarize", "summaries", "accept", "overview"]
+EVERY_COMMAND = ["register", "check", "summarize", "summaries", "accept", "overview",
+                 "ai-summarize", "ai-summaries"]
 
 
 def make_docs(tmp_path):
@@ -217,7 +218,7 @@ def test_rg7_an_empty_file_is_made_into_a_register_file_by_register(tmp_path):
         1, f"Problem: {empty.resolve()} isn't a register file (RG-7)")
     assert empty.read_bytes() == b""
     assert run("register", str(docs), str(empty))[0] == 0
-    assert query(empty, "PRAGMA user_version") == [(4,)]
+    assert query(empty, "PRAGMA user_version") == [(5,)]
 
 
 def test_rg7_bringing_a_file_up_to_date_never_changes_one_that_isnt_a_register_file(tmp_path):

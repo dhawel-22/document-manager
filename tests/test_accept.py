@@ -146,11 +146,11 @@ def test_ac9_unreadable_subfolder_saves_nothing(tmp_path, monkeypatch):
 def test_accepting_brings_an_older_register_file_up_to_date(tmp_path):
     docs, reg = registered_docs(tmp_path)
     con = sqlite3.connect(reg)
-    con.executescript("DROP TABLE unread; DROP TABLE accepted_file; DROP TABLE accepted;"
-                      " PRAGMA user_version = 2;")
+    con.executescript("DROP TABLE ai_summary; DROP TABLE unread; DROP TABLE accepted_file;"
+                      " DROP TABLE accepted; PRAGMA user_version = 2;")
     con.close()
     assert check_folder(docs, reg) == NOTHING  # a version 2 file is read as it is
     (docs / "empty.txt").write_bytes(b"changed")
     accept_folder(docs, reg, check_folder(docs, reg))
-    assert query(reg, "PRAGMA user_version") == [(4,)]
+    assert query(reg, "PRAGMA user_version") == [(5,)]
     assert check_folder(docs, reg) == NOTHING

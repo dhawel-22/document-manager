@@ -487,7 +487,7 @@ def as_version_3(register_file):
     """Turn a register file back into version 3, as made before busy folders."""
     con = sqlite3.connect(register_file)
     try:
-        con.executescript("DROP TABLE unread; PRAGMA user_version = 3;")
+        con.executescript("DROP TABLE ai_summary; DROP TABLE unread; PRAGMA user_version = 3;")
     finally:
         con.close()
 
@@ -504,7 +504,7 @@ def test_bf11_an_older_register_file_keeps_its_lists_and_summaries(tmp_path):
     other = make_docs(tmp_path / "other")
     with held_open(other / MAIL):
         register_folder(other, reg)
-    assert query(reg, "PRAGMA user_version") == [(4,)]
+    assert query(reg, "PRAGMA user_version") == [(5,)]
     for table, rows in old.items():
         assert query(reg, f"SELECT * FROM {table} ORDER BY rowid")[:len(rows)] == rows
     assert query(reg, "SELECT path, reason FROM unread") == [(MAIL, IN_USE)]

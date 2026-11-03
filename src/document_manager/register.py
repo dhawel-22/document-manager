@@ -15,16 +15,19 @@ from document_manager.progress import SUFFIX, PickedUp, Progress
 
 # Each step brings a register file up one version: register.sql makes
 # version 1, register-2.sql adds the summaries (version 2), register-3.sql
-# adds accepted lists (version 3), and register-4.sql adds the files that
-# couldn't be read (version 4).
+# adds accepted lists (version 3), register-4.sql adds the files that
+# couldn't be read (version 4), and register-5.sql adds the AI summaries
+# (version 5).
 STEPS = [
     Path(__file__).with_name(name)
-    for name in ("register.sql", "register-2.sql", "register-3.sql", "register-4.sql")
+    for name in ("register.sql", "register-2.sql", "register-3.sql", "register-4.sql",
+                 "register-5.sql")
 ]
 VERSION = len(STEPS)
 # The tables each step makes, so that a register file of any version can be
 # told from every other file (RG-7).
-STEP_TABLES = [{"folder", "file"}, {"summary"}, {"accepted", "accepted_file"}, {"unread"}]
+STEP_TABLES = [{"folder", "file"}, {"summary"}, {"accepted", "accepted_file"}, {"unread"},
+               {"ai_summary"}]
 
 # Why a file couldn't be read, in plain words (spec/busy-folders.md, Details).
 # Windows gives Python the same answer for a file in use and for one with no

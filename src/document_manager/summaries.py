@@ -40,7 +40,7 @@ def summarize_folder(folder: Path | str, register_file: Path | str,
     register_file = Path(register_file).resolve(strict=True)  # never made here
     con = sqlite3.connect(register_file)
     try:
-        folder_id = _registered(con, folder, register_file)  # RG-7, SM-7, before any change
+        folder_id = registered_id(con, folder, register_file)  # RG-7, SM-7, before any change
         latest = _latest(con, folder_id)
         # Every document is read before anything is saved, and an older
         # register file is brought up to date only then (v1.5).
@@ -58,9 +58,10 @@ def summarize_folder(folder: Path | str, register_file: Path | str,
     return result
 
 
-def _registered(con: sqlite3.Connection, folder: Path, register_file: Path) -> int:
+def registered_id(con: sqlite3.Connection, folder: Path, register_file: Path) -> int:
     """The folder's id in the register file. A file that isn't a register
-    file is refused (RG-7), and so is an unregistered folder (SM-7)."""
+    file is refused (RG-7), and so is an unregistered folder (SM-7). AI
+    summaries use it too (AI-3)."""
     check_register_file(con, register_file)
     row = con.execute("SELECT id FROM folder WHERE path = ?", (str(folder),)).fetchone()
     if row is None:
@@ -168,7 +169,7 @@ def saved_summaries(folder: Path | str, register_file: Path | str) -> list[Saved
     register_file = Path(register_file).resolve(strict=True)
     con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
     try:
-        folder_id = _registered(con, folder, register_file)
+        folder_id = registered_id(con, folder, register_file)
         if not _has_summaries(con):  # a version 1 register file: nothing summarized yet
             return []
         rows = con.execute(
@@ -185,9 +186,10 @@ def saved_summaries(folder: Path | str, register_file: Path | str) -> list[Saved
         ]
     finally:
         con.close()
-    return sorted(summaries, key=lambda s: _folder_order(s.place))
+    return sorted(summaries, key=lambda s: folder_order(s.place))
 
 
-def _folder_order(place: str) -> list[str]:
-    """The order summarize uses: folder by folder, ignoring capitals."""
+def folder_order(place: str) -> list[str]:
+    """The order summarize uses: folder by folder, ignoring capitals. AI
+    summaries are shown in it too."""
     return place.lower().split("/")

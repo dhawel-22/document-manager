@@ -1,15 +1,17 @@
-"""Tests for the register rules in spec/register.md (RG-1 to RG-7)."""
+"""Tests for the register rules in spec/register.md (RG-1 to RG-8)."""
 
 import os
 import re
 import shutil
+import socket
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
-from document_manager.commands import changes_to_accept, run, run_overview
+from document_manager import ai_summaries
+from document_manager.commands import accept, changes_to_accept, run, run_overview
 from document_manager.fingerprint import fingerprint
 from document_manager.progress import Progress
 from document_manager.register import STEP_TABLES, STEPS, prepare_register, register_folder
@@ -237,3 +239,89 @@ def test_rg7_bringing_a_file_up_to_date_never_changes_one_that_isnt_a_register_f
 def test_rg7_each_steps_tables_are_the_ones_its_script_makes():
     for step, tables in zip(STEPS, STEP_TABLES, strict=True):
         assert set(re.findall(r"CREATE TABLE (\w+)", step.read_text(encoding="utf-8"))) == tables
+
+
+def other_capitals(folder):
+    """The folder's full name with the capitals of every letter swapped,
+    like MYCLOUDEX2ULTRA and MyCloudEX2Ultra in thread 16 (RG-8)."""
+    return str(folder.resolve()).swapcase()
+
+
+def saved_with_other_capitals(register_file, folder):
+    """Write the folder's name in the register file with other capitals, as
+    if Windows had given it that way when it was registered (RG-8)."""
+    con = sqlite3.connect(register_file)
+    try:
+        with con:
+            con.execute("UPDATE folder SET path = ? WHERE path = ?",
+                        (other_capitals(folder), str(folder.resolve())))
+    finally:
+        con.close()
+
+
+def free_port():
+    """A port on this computer that nothing is listening on."""
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+@pytest.mark.parametrize("command", ["check", "summarize", "summaries", "accept",
+                                     "ai-summarize", "ai-summaries"])
+def test_rg8_every_command_finds_a_folder_saved_with_other_capitals(tmp_path, monkeypatch,
+                                                                    command):
+    docs = make_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    register_folder(docs, reg)
+    saved_with_other_capitals(reg, docs)
+    monkeypatch.setattr(ai_summaries, "PORT", free_port())  # LM Studio is never used here
+    code, words, _ = given(command, docs, reg)
+    assert "not in the register file" not in words
+    if command == "ai-summarize":  # found, then stopped where LM Studio is asked (AI-9)
+        assert words.startswith("Problem: LM Studio's server isn't running")
+    else:
+        assert code == 0, words
+    assert query(reg, "SELECT path FROM folder") == [(other_capitals(docs),)]  # kept as saved
+
+
+def test_rg8_register_refuses_a_folder_saved_with_other_capitals(tmp_path):
+    docs = make_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    register_folder(docs, reg)
+    saved_with_other_capitals(reg, docs)
+    before = reg.read_bytes()
+    assert run("register", str(docs), str(reg)) == (
+        1, f"Problem: {docs.resolve()} is already registered (RG-5)")
+    assert reg.read_bytes() == before
+
+
+def test_rg8_accept_saves_the_new_list_with_the_folder_saved_with_other_capitals(tmp_path):
+    docs = make_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    register_folder(docs, reg)
+    saved_with_other_capitals(reg, docs)
+    (docs / "empty.txt").write_bytes(b"changed")
+    _, _, shown = changes_to_accept(str(docs), str(reg))
+    assert accept(str(docs), str(reg), shown)[0] == 0
+    assert query(reg, "SELECT folder_id FROM accepted") == [(1,)]
+    assert query(reg, "SELECT id, path FROM folder") == [(1, other_capitals(docs))]
+    assert run("check", str(docs), str(reg)) == (0, "Nothing has changed. Files checked: 3.")
+
+
+def test_rg8_one_folder_saved_twice_under_two_spellings_is_refused(tmp_path):
+    docs = make_docs(tmp_path)
+    reg = tmp_path / "register.db"
+    register_folder(docs, reg)
+    con = sqlite3.connect(reg)
+    try:
+        with con:
+            con.execute("INSERT INTO folder (path, registered_at) VALUES (?, ?)",
+                        (other_capitals(docs), "2026-11-03T12:00:00+00:00"))
+    finally:
+        con.close()
+    before = reg.read_bytes()
+    twice = (f"Problem: {docs.resolve()} is in the register file more than once, as"
+             f" {docs.resolve()} and {other_capitals(docs)} (RG-8)")
+    for command in ("register", "check", "summarize", "ai-summaries"):
+        assert run(command, str(docs), str(reg)) == (1, twice)
+    assert reg.read_bytes() == before

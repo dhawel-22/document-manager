@@ -1,6 +1,6 @@
 # Register
 
-**Version:** 1.4 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.5 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "03 · Lighter routine"
 **Changes:** v1.1 (2026-10-23): RG-5, a refused folder leaves the register
@@ -11,6 +11,8 @@ v1.3 (2026-10-25): RG-5, refused before any file is read
 (spec/long-runs.md). Made through a pull request.
 v1.4 (2026-10-26): RG-7, a file that isn't a register file is refused
 (thread 14's try-out). Made through a pull request.
+v1.5 (2026-11-03): RG-8, a folder is found whatever capitals its name is
+written with (thread 16's try-out). Made through a pull request.
 
 The register is the program's list of files. For each folder registered, it
 keeps every file's place, size and fingerprint (spec/fingerprint.md). Later,
@@ -25,6 +27,7 @@ the check will compare the folder with this list.
 | RG-5 | A folder that is already in the register file is refused before any file is read, and the register file is left exactly as it was. Its list is never silently replaced. |
 | RG-6 | If the folder or a subfolder can't be read, nothing is saved, and the program says which one. A file that can't be read doesn't stop it (spec/busy-folders.md). |
 | RG-7 | Every command refuses a file that isn't a register file, before any folder is read and before anything is changed, and says so. A progress file (spec/long-runs.md) is named as one, with the register file to choose instead. |
+| RG-8 | A folder is found in the register file whatever capitals its name is written with, as Windows does: `\\MYCLOUDEX2ULTRA\Theotrade\Classes` and `\\MyCloudEX2Ultra\Theotrade\Classes` are the same folder. Every command finds it, and Register refuses it as already registered (RG-5). |
 
 Details (v1.4):
 - A register file is an SQLite file with the program's tables for its
@@ -38,3 +41,16 @@ Details (v1.4):
   yet, so the progress file was the only one with its name. It was chosen
   in the window, taken for an old register file, and four empty tables
   were added to it before the run stopped.
+
+Details (v1.5):
+- A folder's name stays as it was saved when it was registered (RG-8).
+- If a register file holds one folder twice, under two spellings, every
+  command refuses it and names both, and nothing is changed (RG-8).
+- A long run's progress file (spec/long-runs.md) still matches a folder's
+  name letter for letter: if the capitals change after a stop, the next
+  run starts again from the first file instead of picking up.
+- Why (thread 16): when 39 network folders were registered (threads 10
+  and 12), Windows gave the network drive's name as MYCLOUDEX2ULTRA. By
+  thread 16 it gave MyCloudEX2Ultra, so every command said those folders
+  weren't in the register file, and Register would have saved one of them
+  a second time.

@@ -2,7 +2,8 @@
 file (spec/summaries.md, SM-1, SM-2, SM-4, SM-5, SM-6, SM-7, SM-9).
 
 The documents are only read (SM-5); the register file is the only file
-written. Nothing is sent anywhere: Stage B is off (SM-9).
+written. Nothing is sent anywhere; Stage B, AI summaries, is in
+ai_summaries.py (SM-9).
 """
 
 import json
@@ -13,7 +14,7 @@ from pathlib import Path
 
 from document_manager.fingerprint import fingerprint
 from document_manager.register import (
-    Counter, all_files, check_register_file, counted, gone, prepare_register,
+    Counter, all_files, check_register_file, counted, find_folder, gone, prepare_register,
 )
 from document_manager.word import CouldNotRead, Summary, summarize_document
 
@@ -63,10 +64,10 @@ def registered_id(con: sqlite3.Connection, folder: Path, register_file: Path) ->
     file is refused (RG-7), and so is an unregistered folder (SM-7). AI
     summaries use it too (AI-3)."""
     check_register_file(con, register_file)
-    row = con.execute("SELECT id FROM folder WHERE path = ?", (str(folder),)).fetchone()
-    if row is None:
+    folder_id = find_folder(con, folder)  # whatever capitals its name has (RG-8)
+    if folder_id is None:
         raise ValueError(f"{folder} is not in the register file (SM-7)")
-    return row[0]
+    return folder_id
 
 
 def _latest(con: sqlite3.Connection, folder_id: int) -> dict[str, tuple[str | None, str | None]]:

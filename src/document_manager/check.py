@@ -6,7 +6,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from document_manager.progress import PickedUp, Progress
-from document_manager.register import Counter, Files, check_register_file, list_files
+from document_manager.register import (
+    Counter, Files, check_register_file, find_folder, list_files,
+)
 
 
 @dataclass
@@ -73,11 +75,10 @@ def listed_files(folder: Path, register_file: Path) -> dict[str, str | None]:
     con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
     try:
         version = check_register_file(con, register_file)  # older versions are read as they are
-        row = con.execute(
-            "SELECT id FROM folder WHERE path = ?", (str(folder),)
-        ).fetchone()
-        if row is None:
+        folder_id = find_folder(con, folder)  # whatever capitals its name has (RG-8)
+        if folder_id is None:
             raise ValueError(f"{folder} is not in the register file (CK-7)")
+        row = (folder_id,)
         if version >= 3:  # accepted lists came in version 3
             newest = con.execute(
                 "SELECT id FROM accepted WHERE folder_id = ? ORDER BY id DESC LIMIT 1",

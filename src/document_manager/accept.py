@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from document_manager.check import CheckResult, compare_files, listed_files
-from document_manager.register import Counter, Files, list_files, prepare_register
+from document_manager.register import Counter, Files, find_folder, list_files, prepare_register
 
 
 def accept_folder(folder: Path | str, register_file: Path | str, shown: CheckResult,
@@ -35,9 +35,7 @@ def accept_folder(folder: Path | str, register_file: Path | str, shown: CheckRes
     try:
         with con:
             prepare_register(con)
-            folder_id = con.execute(
-                "SELECT id FROM folder WHERE path = ?", (str(folder),)
-            ).fetchone()[0]
+            folder_id = find_folder(con, folder)  # whatever capitals its name has (RG-8)
             now = datetime.now(timezone.utc).isoformat(timespec="seconds")
             accepted_id = con.execute(
                 "INSERT INTO accepted (folder_id, accepted_at) VALUES (?, ?)",

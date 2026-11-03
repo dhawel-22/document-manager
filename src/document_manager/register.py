@@ -166,16 +166,29 @@ def check_register_file(con: sqlite3.Connection, register_file: Path,
 
 
 def is_registered(con: sqlite3.Connection, folder: Path) -> bool:
-    """Whether the folder is in the register file. A new register file has
-    no folder table yet."""
+    """Whether the folder is in the register file, whatever capitals its
+    name is written with (RG-8). A new register file has no folder table
+    yet."""
     has_table = con.execute(
         "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'folder'"
     ).fetchone()
     if not has_table:
         return False
-    return con.execute(
-        "SELECT 1 FROM folder WHERE path = ?", (str(folder),)
-    ).fetchone() is not None
+    return find_folder(con, folder) is not None
+
+
+def find_folder(con: sqlite3.Connection, folder: Path) -> int | None:
+    """The folder's id in the register file, or None if it isn't there. Its
+    name is matched the way Windows matches names, whatever capitals it's
+    written with (RG-8). One folder saved twice, under two spellings, is
+    refused, naming both."""
+    wanted = os.path.normcase(str(folder))
+    found = [(folder_id, path) for folder_id, path in con.execute("SELECT id, path FROM folder")
+             if os.path.normcase(path) == wanted]
+    if len(found) > 1:
+        names = " and ".join(path for _, path in found)
+        raise ValueError(f"{folder} is in the register file more than once, as {names} (RG-8)")
+    return found[0][0] if found else None
 
 
 def list_files(folder: Path, counter: Counter | None = None,

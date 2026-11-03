@@ -1,6 +1,6 @@
 # Document Manager: Opening Document
 
-**Version:** 1.7 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
+**Version:** 1.8 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
 **Drafted by:** Claude, from thread "00 · Planning talk"
 **Changes:** v1.1 (2026-09-25): D-009 answered: public. Made through a pull request.
 v1.2 (2026-09-25): D-016 and D-017 added, from the guards plan. Made through a pull request.
@@ -9,6 +9,8 @@ v1.4 (2026-09-26): D-019 added. Made through a pull request.
 v1.5 (2026-09-29): D-020 added; rule 1 updated. Made through a pull request.
 v1.6 (2026-09-29): D-021 added. Made through a pull request.
 v1.7 (2026-10-23): D-022 added; section 8 updated. Made through a pull request.
+v1.8 (2026-11-03): D-023 added; the goal, D-011 and questions 4 and 6
+updated. Made through a pull request.
 
 Status labels (per D-015):
 - **Ernie:** decided by Ernie
@@ -23,7 +25,8 @@ build a tool worth having.
 
 ## 2. Goal (Ernie)
 - Product: a robust document manager with a Python GUI.
-- Long term: manage all of Ernie's files, across network shares and Google Drive.
+- Long term: manage all of Ernie's files, across network shares. Google Drive
+  is left out (D-023).
 
 ## 3. Working rules
 1. Documentation first. No changes of any kind until the relevant document
@@ -52,7 +55,7 @@ build a tool worth having.
 | D-008 | Decision records for every section: one register, replaced but never edited | Ernie; register rules On trust |
 | D-009 | Practice repository on GitHub Free, public; GitHub Pro when private work starts; no real data in any repository | Ernie: public; rest On trust |
 | D-010 | Practice project is a document register | Replaced by D-011 |
-| D-011 | The project is a document manager with a Python GUI; long term, all network files and Google Drive. Engine first, thin GUI | Ernie; engine-first and thin GUI On trust |
+| D-011 | The project is a document manager with a Python GUI; long term, all network files and Google Drive. Engine first, thin GUI | Ernie; engine-first and thin GUI On trust; Google Drive replaced by D-023 |
 | D-012 | SQL added to the required tools | Ernie; tool choices On trust |
 | D-013 | One project, the Document Manager. The vault is Phase 0. Small sidebar; threads added only when needed | Ernie |
 | D-014 | Code lives at D:\python\projects\document-manager, not in Google Drive | Ernie |
@@ -64,6 +67,7 @@ build a tool worth having.
 | D-020 | One "go" per change; "merged" starts the update of this computer. Looking (reading files, checking GitHub or the app) needs no "go" | Ernie |
 | D-021 | Quality over speed: the highest thinking setting ("max") and the full text of every change in chat stay, even under budget pressure | Ernie |
 | D-022 | The window is built with PySide6, because it handles very large lists of files. Its tests use pytest-qt, which clicks through the window | On trust |
+| D-023 | Google Drive is left out: the program has no Google Drive features, and Drive's files are never copied to this computer | Ernie |
 
 ## 5. Phases (On trust)
 Each phase must pass a clean scorecard before the next one starts.
@@ -105,9 +109,11 @@ linked by rule IDs.
    full lock. No: $4 a month, or no lock until the fire drills. (D-009)
 2. Who are the lessons for?
 3. Do you have Microsoft 365 / SharePoint?
-4. Google Drive: mostly uploaded files, or native Docs and Sheets?
+4. Not needed any more (D-023). Google Drive: mostly uploaded files, or
+   native Docs and Sheets?
 5. Roughly how many files across the network?
-6. Export read-only copies to G:\My Drive\Document Manager?
+6. Not needed any more (D-023). Export read-only copies to
+   G:\My Drive\Document Manager?
 
 ## 10. First steps after "go" (On trust)
 One step at a time. At each stop, Ernie reviews before anything continues.

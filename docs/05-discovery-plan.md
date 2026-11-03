@@ -1,8 +1,10 @@
 # Document Manager: Discovery plan
 
-**Version:** 1.0 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "12 · Phase 3: all network files"
+**Changes:** v1.1 (2026-11-03): section 3, Google Drive is left out
+(D-023). Made through a pull request.
 
 The program has two parts (Ernie, thread 12): discovery first, then a
 vault.
@@ -43,9 +45,9 @@ Together, the answers make a map of Ernie's files: what belongs in the
 vault, and how to bring it in.
 
 ## 3. Where
-T: first, then Google Drive and this computer's own folders. Whether
-the second network drive (Y:, system backups) is included is Ernie's
-decision.
+T: first, then this computer's own folders. Google Drive is left out
+(D-023). Whether the second network drive (Y:, system backups) is
+included is Ernie's decision.
 
 ## 4. How it works
 - Read-only, always: discovery never changes, moves or deletes a file.

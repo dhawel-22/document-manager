@@ -737,3 +737,104 @@ Next: 14 · Discovery: runs that don't fail. First, a run that carries on
 past a file that's deleted, renamed or locked, and says which one, with
 its rules in spec/ first; then a long run that picks up where it left
 off after a stop.
+
+## 14 · Discovery: runs that don't fail (2026-10-25 to 2026-11-02)
+Purpose: a run that carries on past a file that's deleted, renamed or
+locked, and says which one, with its rules in spec/ first; then a long
+run that picks up where it left off after a stop.
+Decided: the busy-folder rules, spec/busy-folders.md, BF-1 to BF-11
+(Ernie, #82); the long-run rules, spec/long-runs.md, LR-1 to LR-9
+(Ernie, #85); fix first: refuse a file that isn't a register file, rule
+RG-7 (Ernie, #87), and its code (Ernie, #88); drop the long-run try-out
+redo and get back to document management (Ernie); the code's details,
+among them register file version 4 (On trust).
+Done:
+- Busy folders (#82 to #84): Register, Check, Accept and Summarize carry
+  on past a file that's deleted, renamed, locked or changing. A file
+  that can't be read is named, with the reason, and kept on the list
+  without a fingerprint. Check never says "Nothing has changed" when a
+  file couldn't be read, and the overview counts these files. 43 new
+  tests.
+- A try-out by Ernie in the window, on 5 fake files, one of them held
+  open the way Outlook holds its mail file: Register named it "couldn't
+  read", and Check and Overview counted it. Once it was let go, Check
+  showed it as new, Accept saved a new list with it, and Check said
+  "Nothing has changed. Files checked: 5." All 5 fake files were the
+  same before and after.
+- Long runs (#85, #86): Register and Check keep what they've read in a
+  progress file next to the register file, and the next run of the same
+  folder picks up from there, whatever stopped it. Register now refuses
+  a registered folder before reading any file. 23 new tests, among them
+  a real power cut.
+- The long-run try-out in the window, on 200,000 fake files, wasn't
+  finished. After a stopped Register, the progress file was chosen as
+  the register file. The program took it for an old register file,
+  changed it, and stopped with "no such table: folder". All 200,000 fake
+  files were unchanged, and the real register file wasn't used.
+- Not a register file (#87, #88): every command refuses a file that
+  isn't a register file, before reading any folder or changing anything,
+  and names a progress file as one, with the register file to choose
+  instead. 23 new tests. The real register file passes, and the
+  try-out's two progress files are refused.
+- Each code draft was tested in the scratch folder and broken on
+  purpose, in 77 ways in all; the tests caught every one. All 270 tests
+  pass on GitHub.
+Lessons:
+- At the start, and again after a week's break, thinking was "medium";
+  Ernie switched it to "max" both times.
+- A break on purpose (Ctrl+C) looked caught only because it stopped the
+  whole test run. Its test now fails cleanly, and the break was run
+  again.
+- The first long-run code made Check slower (1.50 s against 1.23 s on
+  5,000 files): a run that finished first saved its progress, then
+  deleted it. Now progress is kept once a minute while files are read,
+  and when a run stops: 1.27 s against 1.29 s, and up to 0.1 s slower
+  in quicker runs.
+- In the busy-folder try-out, "let go" came before part 1 was done.
+  Nothing had run yet and the file was still held, so part 1 was done
+  first.
+- The long-run try-out found what the tests didn't: after a stopped
+  first Register, the only file with the register file's name was the
+  progress file, so the file picker offered it.
+- Claude asked twice about the RG-7 code without saying again, in plain
+  words, what it was, and Ernie asked. Explain a choice first, then ask.
+- The mode stayed Manual after all seven merges (#82 to #88).
+Open: what changes, and how often (question 4): the register knows only
+accepted changes, and each file's last-changed date (the sweep by dates)
+could answer it; how much keeping progress slows a run on T:, unknown
+until a real run; where the vault will be (Ernie asked): not decided, it
+depends on who needs the documents; the overview's dates are in UTC
+while the window's status line uses this computer's time; the
+duplicates fill most of the overview (2,690 of 2,838 lines on the real
+register file); the backup folder on T:, and 2 loose files there; Y:
+(system backups), Ernie to decide; Google Drive and this computer's own
+folders; the vault, later, with check-out and check-in; only Word
+documents are summarized, not PDFs; AI summaries (Stage B), to run on
+this computer; the register saves a network folder under its network
+address, not its drive letter; online-only Drive files weren't looked
+at; open question 4 can be answered in the opening document (Ernie has
+no Google Docs); Check on docs and spec shows changes from merged pull
+requests, for Ernie to accept; the register file
+D:\python\document-manager-register.db stays, with 43 folders, still at
+version 3: the next Register, Accept or Summarize on it brings it to
+version 4; why the mode switches after merges; the register file
+picker's button says "Save"; "Starts" in a summary includes headings
+(SM-3), Ernie to decide; the demo folders D:\python\demo-window,
+demo-busy and demo-long (200,000 fake files), the register file
+demo-busy-register.db and the try-out's two progress files,
+demo-long-register.db.progress and
+demo-long-register.db.progress.progress, stay until Ernie deletes them;
+old branches on GitHub, now also thread-13-log, busy-folders-rules,
+busy-folders-engine, busy-folders-overview, long-runs-rules,
+long-runs-code, not-a-register-file-rule and not-a-register-file-code;
+the old name "dhawel-22" saved in the GitHub tool; numbers in names sort
+character by character ("Report 10" before "Report 2"); the four
+questions of the reuse plan (docs/02-reuse-plan.md, section 7); a drill
+where the AI account tries to merge; rules 4 and 7 still only ask; the
+flashing check script window; tools from the opening document not set
+up yet (pre-commit, Pydantic/pandera, check-out/check-in scripts); why
+the PowerShell command swapped the file names and contents (thread 03);
+open questions 2, 3, 5 and 6.
+Next: 15 · Discovery: the backup folder on T:. First, a quiet time to
+run it (about 10 hours) and a copy of the register file kept; then
+Register on it in the window, read-only, picking up after any stop.

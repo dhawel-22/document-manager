@@ -278,7 +278,7 @@ def test_ov11_a_missing_register_file(tmp_path):
 def test_ov11_a_file_that_isnt_a_register_file(tmp_path):
     text = tmp_path / "notes.db"
     text.write_bytes(b"Just some notes, not a register file.\n" * 20)
-    with pytest.raises(sqlite3.DatabaseError):
+    with pytest.raises(ValueError, match=r"isn't a register file \(RG-7\)"):
         overview(text)
     empty = tmp_path / "empty.db"
     empty.write_bytes(b"")

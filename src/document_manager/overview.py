@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path, PureWindowsPath
 
 from document_manager.check import CheckResult, compare
-from document_manager.register import VERSION
+from document_manager.register import check_register_file
 
 # The five kinds, in the order the overview shows them (OV-4).
 DOCUMENTS = "Documents"
@@ -183,12 +183,9 @@ def ending(name: str) -> str:
 def _lists(con: sqlite3.Connection, register_file: Path) -> dict[str, list[tuple[str, Listing]]]:
     """Each folder's lists with their dates, oldest first: the list saved when
     it was registered, then each accepted list (OV-2, OV-9). Older register
-    files are read as they are."""
-    version = con.execute("PRAGMA user_version").fetchone()[0]
-    if version == 0:
-        raise ValueError(f"{register_file} isn't a register file (OV-11)")
-    if version > VERSION:
-        raise ValueError(f"Unknown register file version: {version}")
+    files are read as they are. A file that isn't a register file is refused
+    (RG-7, OV-11)."""
+    version = check_register_file(con, register_file)
     lists_of = {}
     for folder_id, path, registered_at in con.execute(
             "SELECT id, path, registered_at FROM folder").fetchall():

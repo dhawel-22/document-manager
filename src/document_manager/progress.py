@@ -14,6 +14,7 @@ from time import monotonic
 from typing import NamedTuple
 
 KEEP_EVERY = 60  # seconds: progress is kept at least this often while files are read (LR-2)
+SUFFIX = ".progress"  # added to the register file's name (spec/long-runs.md, Details)
 VERSION = 1
 TABLES = """
 BEGIN;
@@ -62,7 +63,7 @@ class Progress:
     """The progress of one kind of run, Register or Check, on one folder."""
 
     def __init__(self, register_file: Path, kind: str, folder: Path) -> None:
-        self.path = register_file.with_name(register_file.name + ".progress")
+        self.path = register_file.with_name(register_file.name + SUFFIX)
         self.kind = kind
         self.folder = str(folder)
         self.waiting = []  # files read since the progress was last kept

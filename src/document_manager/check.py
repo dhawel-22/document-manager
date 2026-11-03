@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from document_manager.progress import PickedUp, Progress
-from document_manager.register import VERSION, Counter, Files, list_files
+from document_manager.register import Counter, Files, check_register_file, list_files
 
 
 @dataclass
@@ -72,9 +72,7 @@ def listed_files(folder: Path, register_file: Path) -> dict[str, str | None]:
     it that couldn't be read (BF-6)."""
     con = sqlite3.connect(f"{register_file.as_uri()}?mode=ro", uri=True)
     try:
-        version = con.execute("PRAGMA user_version").fetchone()[0]
-        if not 1 <= version <= VERSION:  # version 1 files are read as they are
-            raise ValueError(f"Unknown register file version: {version}")
+        version = check_register_file(con, register_file)  # older versions are read as they are
         row = con.execute(
             "SELECT id FROM folder WHERE path = ?", (str(folder),)
         ).fetchone()

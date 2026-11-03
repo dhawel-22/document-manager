@@ -1,4 +1,5 @@
-"""Word: one Word document's Stage A summary (spec/summaries.md, SM-3, SM-6).
+"""Word: one Word document's Stage A summary (spec/summaries.md, SM-3, SM-6),
+and its text for an AI summary (spec/ai-summaries.md, AI-3).
 
 Documents are opened for reading only. Nothing here can save, change, move
 or delete a document (SM-5).
@@ -39,16 +40,8 @@ def summarize_document(path: Path | str) -> Summary:
 
     Raises CouldNotRead with the reason, instead of guessing (SM-6).
     """
-    path = Path(path)
-    if path.name.startswith("~$"):
-        raise CouldNotRead("Word's temporary lock file, not a document")
-    if path.suffix.lower() == ".doc":
-        raise CouldNotRead("old Word file (.doc); save it as .docx in Word first")
+    document = _open(Path(path))
     try:
-        with open(path, "rb") as f:
-            if f.read(len(OLD_FORMAT)) == OLD_FORMAT:
-                raise CouldNotRead("protected with a password, or not a real .docx inside")
-        document = docx.Document(str(path))
         title = _saved_title(document)
         headings = []
         words = []
@@ -61,11 +54,41 @@ def summarize_document(path: Path | str) -> Summary:
             if heading and text:
                 headings.append((int(heading.group(1)), text))
             words.extend(paragraph.text.split())
+    except Exception as error:  # one unreadable document is listed, not fatal (SM-6)
+        raise CouldNotRead(f"{type(error).__name__}: {error}") from error
+    return Summary(title, headings, " ".join(words[:FIRST_WORDS]), len(words))
+
+
+def document_text(path: Path | str) -> str:
+    """One Word document's text, read the same way as for its Stage A
+    summary (AI-3): the main text, tables included, in reading order, one
+    paragraph to a line. Its words are the ones Stage A counts.
+
+    Raises CouldNotRead with the reason, instead of guessing (SM-6).
+    """
+    document = _open(Path(path))
+    try:
+        paragraphs = _paragraphs(document.iter_inner_content())
+        return "\n".join(paragraph.text for paragraph in paragraphs)
+    except Exception as error:  # one unreadable document is listed, not fatal (SM-6)
+        raise CouldNotRead(f"{type(error).__name__}: {error}") from error
+
+
+def _open(path: Path):
+    """The document, opened for reading, or CouldNotRead with the reason (SM-6)."""
+    if path.name.startswith("~$"):
+        raise CouldNotRead("Word's temporary lock file, not a document")
+    if path.suffix.lower() == ".doc":
+        raise CouldNotRead("old Word file (.doc); save it as .docx in Word first")
+    try:
+        with open(path, "rb") as f:
+            if f.read(len(OLD_FORMAT)) == OLD_FORMAT:
+                raise CouldNotRead("protected with a password, or not a real .docx inside")
+        return docx.Document(str(path))
     except CouldNotRead:
         raise
     except Exception as error:  # one unreadable document is listed, not fatal (SM-6)
         raise CouldNotRead(f"{type(error).__name__}: {error}") from error
-    return Summary(title, headings, " ".join(words[:FIRST_WORDS]), len(words))
 
 
 def _saved_title(document) -> str:

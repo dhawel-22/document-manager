@@ -1,5 +1,6 @@
 """The commands' words, made in one place (spec/report.md, spec/summaries.md,
-spec/accept.md, spec/overview.md, spec/busy-folders.md, spec/long-runs.md).
+spec/accept.md, spec/overview.md, spec/busy-folders.md, spec/long-runs.md,
+spec/ai-summaries.md).
 
 The commands print these words and the window shows them, so both always
 say exactly the same (spec/window.md, WN-3, WN-4).
@@ -8,6 +9,7 @@ say exactly the same (spec/window.md, WN-3, WN-4).
 import sqlite3
 
 from document_manager.accept import accept_folder
+from document_manager.ai_summaries import LMStudioProblem, ai_summarize_folder, saved_ai_summaries
 from document_manager.check import CheckResult, check_folder
 from document_manager.overview import overview
 from document_manager.overview_report import overview_report
@@ -15,21 +17,26 @@ from document_manager.progress import PickedUp
 from document_manager.register import Counter, Files, register_folder
 from document_manager.report import report
 from document_manager.summaries import saved_summaries, summarize_folder
-from document_manager.summary_report import summaries_report, summarize_report
+from document_manager.summary_report import (
+    ai_summaries_report, ai_summarize_report, summaries_report, summarize_report,
+)
 
-COMMANDS = ("register", "check", "summarize", "summaries")
+COMMANDS = ("register", "check", "summarize", "summaries")  # each has a button (WN-3)
+AI_COMMANDS = ("ai-summarize", "ai-summaries")  # typed only, for now (spec/ai-summaries.md)
 PICKS_UP = ("register", "check")  # the runs that pick up after a stop (LR-8)
-PROBLEMS = (OSError, ValueError, sqlite3.Error)
+PROBLEMS = (OSError, ValueError, sqlite3.Error, LMStudioProblem)
 ACCEPT_QUESTION = "Accept these changes? Type yes to accept: "
 NOTHING_SAVED = "Nothing was saved."
+AI_STOPPED = ("AI summaries stopped. The ones made before the stop are saved, and the next"
+              " run carries on with the rest (AI-7, AI-8).")
 
 
 def run(command: str, folder: str, register_file: str,
         counter: Counter | None = None) -> tuple[int, str]:
     """Run one command. Returns 0 and its words when it worked, or 1 and one
     plain line when there was a problem (RP-4). Only the window passes a
-    counter (spec/window.md, WN-13); Summaries reads only the register file,
-    so it has nothing to count."""
+    counter (spec/window.md, WN-13); summaries and ai-summaries read only
+    the register file, so they have nothing to count."""
     try:
         if command == "register":
             files = register_folder(folder, register_file, counter)
@@ -41,6 +48,10 @@ def run(command: str, folder: str, register_file: str,
             return 0, summarize_report(summarize_folder(folder, register_file, counter))
         if command == "summaries":
             return 0, summaries_report(folder, saved_summaries(folder, register_file))  # SM-8
+        if command == "ai-summarize":
+            return 0, ai_summarize_report(ai_summarize_folder(folder, register_file, counter))
+        if command == "ai-summaries":
+            return 0, ai_summaries_report(folder, saved_ai_summaries(folder, register_file))
         raise ValueError(f"Unknown command: {command}")
     except PROBLEMS as error:
         return 1, f"Problem: {error}"  # RP-4

@@ -1,5 +1,7 @@
-"""Summary report: summaries in plain words (spec/summaries.md, SM-8)."""
+"""Summary report: summaries in plain words (spec/summaries.md, SM-8, and
+spec/ai-summaries.md, Commands)."""
 
+from document_manager.ai_summaries import AiSummarizeResult, SavedAiSummary
 from document_manager.summaries import SavedSummary, SummarizeResult
 
 
@@ -34,6 +36,32 @@ def summaries_report(folder: str, summaries: list[SavedSummary]) -> str:
     if unread:
         lines += ["", "Couldn't read:"]
         lines += [f"  {s.place}  {s.problem}" for s in unread]
+    return "\n".join(lines)
+
+
+def ai_summarize_report(result: AiSummarizeResult) -> str:
+    """One line with the counts, then each document with no AI summary, and
+    why (AI-6, AI-11, SM-6)."""
+    lines = [
+        f"AI summaries made: {len(result.made)}, unchanged: {result.unchanged}, "
+        f"too long: {len(result.too_long)}, couldn't read: {len(result.could_not_read)}, "
+        f"not made: {len(result.not_made)}."
+    ]
+    lines += [f"  too long  {place}  {words} words" for place, words in result.too_long]
+    lines += [f"  couldn't read  {place}  {reason}" for place, reason in result.could_not_read]
+    lines += [f"  not made  {place}  {reason}" for place, reason in result.not_made]
+    return "\n".join(lines)
+
+
+def ai_summaries_report(folder: str, summaries: list[SavedAiSummary]) -> str:
+    """Each document's place and latest AI summary, with when and by which
+    model it was made."""
+    if not summaries:
+        return f"No AI summaries yet for {folder}. Run ai-summarize first."
+    lines = [f"AI summaries for {folder}. Documents: {len(summaries)}."]
+    for s in summaries:
+        lines += ["", f"{s.place}  (made {_when(s.made_at)} by {s.model})"]
+        lines += [f"  {line}" for line in s.summary.splitlines() if line.strip()]
     return "\n".join(lines)
 
 

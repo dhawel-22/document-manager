@@ -1,6 +1,6 @@
 # Document Manager: Opening Document
 
-**Version:** 1.8 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
+**Version:** 1.9 · **Approved by:** Ernie, 2026-09-24 · **Owner:** Ernie
 **Drafted by:** Claude, from thread "00 · Planning talk"
 **Changes:** v1.1 (2026-09-25): D-009 answered: public. Made through a pull request.
 v1.2 (2026-09-25): D-016 and D-017 added, from the guards plan. Made through a pull request.
@@ -11,6 +11,7 @@ v1.6 (2026-09-29): D-021 added. Made through a pull request.
 v1.7 (2026-10-23): D-022 added; section 8 updated. Made through a pull request.
 v1.8 (2026-11-03): D-023 added; the goal, D-011 and questions 4 and 6
 updated. Made through a pull request.
+v1.9 (2026-11-03): D-024 added. Made through a pull request.
 
 Status labels (per D-015):
 - **Ernie:** decided by Ernie
@@ -68,6 +69,7 @@ build a tool worth having.
 | D-021 | Quality over speed: the highest thinking setting ("max") and the full text of every change in chat stay, even under budget pressure | Ernie |
 | D-022 | The window is built with PySide6, because it handles very large lists of files. Its tests use pytest-qt, which clicks through the window | On trust |
 | D-023 | Google Drive is left out: the program has no Google Drive features, and Drive's files are never copied to this computer | Ernie |
+| D-024 | No vault for the documents: they stay where they are, and the register keeps each one's pointer and summary. AI summaries are made on this computer | Ernie |
 
 ## 5. Phases (On trust)
 Each phase must pass a clean scorecard before the next one starts.

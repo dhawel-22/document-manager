@@ -1,10 +1,21 @@
 # Document Manager: Discovery plan
 
-**Version:** 1.1 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
+**Version:** 1.2 · **Owner:** Ernie · **Approved by:** Ernie, by merging the
 pull request that added this file
 **Drafted by:** Claude, in thread "12 · Phase 3: all network files"
 **Changes:** v1.1 (2026-11-03): section 3, Google Drive is left out
 (D-023). Made through a pull request.
+v1.2 (2026-11-03): discovery is done for now, and no vault (Ernie,
+thread 15). Made through a pull request.
+
+**Since thread 15 (Ernie):** discovery is done for now. The Overview
+answers questions 1 to 3 for T:, apart from its backup folder and 2
+loose files, and for this computer's Downloads folder. What's left is
+mostly backups and program files, looked at only if a reason comes up.
+No vault is needed (D-024): the documents stay where they are, and the
+register keeps each one's pointer and summary. AI summaries, made on
+this computer, come next. The vault in sections 1 and 5 is kept as the
+record of thread 12's plan.
 
 The program has two parts (Ernie, thread 12): discovery first, then a
 vault.

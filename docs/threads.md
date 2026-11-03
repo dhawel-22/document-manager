@@ -838,3 +838,93 @@ open questions 2, 3, 5 and 6.
 Next: 15 · Discovery: the backup folder on T:. First, a quiet time to
 run it (about 10 hours) and a copy of the register file kept; then
 Register on it in the window, read-only, picking up after any stop.
+
+## 15 · Discovery: Google Drive (G:) (2026-11-03)
+Purpose: discovery on Google Drive (G:), read-only, instead of T:'s
+backup folder, as T: was about to be busy with runs and backups
+(Ernie); then what comes after discovery.
+Decided: nothing on G: is copied to this computer, as there isn't room
+(Ernie); the rules for asking Google for G:'s list instead,
+spec/google-drive.md (Ernie, #90); then no Google Drive features at
+all, as more effort than value, D-023 (Ernie, #91); discovery is done
+for now; no vault: the documents stay where they are, and the register
+keeps each one's pointer and summary, D-024 (Ernie); next, AI summaries
+made on this computer, for the network and this computer's folders,
+then a search; Google Drive later, only if it proves worth it (Ernie).
+Done:
+- A count of G:, look only: 103,923 files in 10,556 folders, 626 GB,
+  in under a minute, with no errors; 80 files changed in the last 7
+  days. About 490 GB is in four backup and system-image folders. 1,855
+  Word and PDF files, 4.1 GB, 921 of them (2.1 GB) outside the backup
+  folders. Windows showed every file the same way, so the count
+  couldn't tell which files are kept only at Google.
+- Google's Drive documentation, read: Google keeps a SHA-256
+  fingerprint for each stored file, but not for Google Docs or
+  shortcuts, and the permission to see the files' details is one
+  Google calls "restricted".
+- The Google Drive rules (#90), merged, then removed again, with the
+  window's rules put back (#91): spec/window.md v1.8, the opening
+  document v1.8 (D-023) and the discovery plan v1.1.
+- Step 2, the sign-in command and Google's libraries, was drafted and
+  tried in the scratch folder (41 tests passed, and 10 breaks on
+  purpose were caught), then dropped. None of it reached the project,
+  and no library was installed.
+- With this entry: the opening document v1.9 (D-024) and the discovery
+  plan v1.2, discovery done for now and no vault.
+Lessons:
+- At the start, thinking was "medium"; Ernie switched it to "max".
+- Say what a route costs, and what it adds over the simplest way,
+  before researching it. The Google route got two rule changes and a
+  drafted command before Ernie judged it more effort than value.
+- Ernie's own questions ("do we need discovery?", a database instead of
+  a vault) cut the plan down to what he needs. Ask what a step is for
+  before building it.
+- The first "merged" for #90 came before the merge went through: it
+  was approved, not merged. Checking GitHub first (card step 4) caught
+  it.
+- A break on purpose that leaves the code unable to load is caught for
+  the wrong reason. The Ctrl+C break did that at first; it was redone.
+- The guards blocked a command that deleted cache folders in the
+  scratch folder (rule 6). Copying only Git's files needed no delete.
+- tar in Git Bash reads "C:" in a path as a network address; write
+  /c/... instead.
+- The mode stayed Manual after both merges (#90, #91).
+Open: a search of the summaries and names, after AI summaries; only
+Word documents are summarized, not PDFs; "Starts" in a summary
+includes headings (SM-3), Ernie to decide; Google Drive only if it
+proves worth it: pointers from the listing, and each document read
+once for its summary (921 Word and PDF files outside the backups,
+2.1 GB), which would change D-023; a folder inside another registered
+folder is counted twice by the overview, each of its files as a
+duplicate of itself (read in the code); the test folder
+G:\My Drive\Document manager test stays in the register file as a
+record; discovery's leftovers, only if a reason comes up: what changes
+and how often (question 4), T:'s backup folder and 2 loose files, Y:,
+and how much keeping progress slows a run on T:; the overview's dates
+are in UTC while the window's status line uses this computer's time;
+the duplicates fill most of the overview (2,690 of 2,838 lines on the
+real register file); the register saves a network folder under its
+network address, not its drive letter; Check on docs and spec shows
+changes from merged pull requests, for Ernie to accept; the register
+file D:\python\document-manager-register.db stays, with 43 folders,
+still at version 3: the next Register, Accept or Summarize on it brings
+it to version 4; why the mode switches after merges; the register file
+picker's button says "Save"; the demo folders D:\python\demo-window,
+demo-busy and demo-long (200,000 fake files), the register file
+demo-busy-register.db and the try-out's two progress files,
+demo-long-register.db.progress and
+demo-long-register.db.progress.progress, stay until Ernie deletes them;
+old branches on GitHub, now also thread-14-log, google-drive-rules and
+google-drive-out; the old name "dhawel-22" saved in the GitHub tool;
+numbers in names sort character by character ("Report 10" before
+"Report 2"); the four questions of the reuse plan
+(docs/02-reuse-plan.md, section 7); a drill where the AI account tries
+to merge; rules 4 and 7 still only ask; the flashing check script
+window; tools from the opening document not set up yet (pre-commit,
+Pydantic/pandera, check-out/check-in scripts); why the PowerShell
+command swapped the file names and contents (thread 03); open
+questions 2, 3 and 5.
+Next: 16 · AI summaries on this computer. First, what it takes, for
+Ernie's decision: a local AI program such as Ollama and one model,
+with their sizes and versions; then Stage B's rules in spec/ (SM-9),
+for his approval; then a try-out on Word documents already registered.
